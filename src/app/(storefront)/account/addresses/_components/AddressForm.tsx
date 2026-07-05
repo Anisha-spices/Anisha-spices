@@ -94,6 +94,9 @@ export function AddressForm({
                   name="phone"
                   defaultValue={address?.phone}
                   required
+                  pattern="[0-9]{10}"
+                  maxLength={10}
+                  title="Please enter a valid 10-digit phone number"
                   className="block w-full rounded-md border-0 py-2.5 px-3.5 text-text shadow-sm ring-1 ring-inset ring-border focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
                 />
               </div>
@@ -178,21 +181,7 @@ export function AddressForm({
               </div>
             </div>
 
-            <div>
-              <label htmlFor="country" className="block text-sm font-medium leading-6 text-text">
-                Country
-              </label>
-              <div className="mt-2">
-                <input
-                  type="text"
-                  id="country"
-                  name="country"
-                  value="India"
-                  disabled
-                  className="block w-full rounded-md border-0 py-2.5 px-3.5 text-text shadow-sm ring-1 ring-inset ring-border bg-surface-dark opacity-70 cursor-not-allowed sm:text-sm sm:leading-6"
-                />
-              </div>
-            </div>
+
 
             <div className="sm:col-span-2">
               <label className="flex items-center gap-3">

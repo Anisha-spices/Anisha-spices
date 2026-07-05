@@ -51,8 +51,8 @@ export function ProfileForm({
             type="email"
             id="email"
             value={email}
-            disabled
-            className="block w-full rounded-md border-0 py-2.5 px-3.5 text-text shadow-sm ring-1 ring-inset ring-border bg-surface-dark opacity-70 cursor-not-allowed sm:text-sm sm:leading-6"
+            readOnly
+            className="block w-full rounded-md border-0 py-2.5 px-3.5 text-text shadow-sm ring-1 ring-inset ring-border placeholder:text-text-muted focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
           />
           <p className="mt-1 text-xs text-text-muted">Your email address cannot be changed here.</p>
         </div>
@@ -76,7 +76,7 @@ export function ProfileForm({
 
       <div>
         <label htmlFor="phone" className="block text-sm font-medium leading-6 text-text">
-          Phone Number
+          Phone Number <span className="text-red-500">*</span>
         </label>
         <div className="mt-2">
           <input
@@ -84,6 +84,10 @@ export function ProfileForm({
             id="phone"
             name="phone"
             defaultValue={initialPhone}
+            required
+            pattern="[0-9]{10}"
+            maxLength={10}
+            title="Please enter a valid 10-digit phone number"
             className="block w-full rounded-md border-0 py-2.5 px-3.5 text-text shadow-sm ring-1 ring-inset ring-border placeholder:text-text-muted focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
           />
         </div>
