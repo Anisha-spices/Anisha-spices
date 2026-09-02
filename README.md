@@ -1,4 +1,4 @@
-# 🌿 Anisha Spices (Aura Masale)
+# 🌿 Anisha Spices 
 
 > **Pure Spice. Real Taste. Trusted Every Time.**  
 > A full-stack, production-ready D2C e-commerce platform built with Next.js (App Router), Supabase (PostgreSQL + Auth + RLS), and Tailwind CSS.
