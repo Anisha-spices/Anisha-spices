@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { cookies } from 'next/headers'
 import {
   ShoppingCart,
   Users,
@@ -14,7 +16,9 @@ export const metadata: Metadata = {
 }
 
 async function getStats() {
-  const supabase = await createClient()
+  const cookieStore = await cookies()
+  const isAdminCookie = cookieStore.get('admin_session')?.value === 'authenticated'
+  const supabase = isAdminCookie ? createAdminClient() : await createClient()
 
   const [ordersRes, customersRes, productsRes, recentOrdersRes] =
     await Promise.all([
@@ -146,7 +150,7 @@ export default async function AdminDashboardPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[540px]">
               <thead>
                 <tr className="bg-stone-50/50">
                   <th className="text-left text-xs font-medium text-stone-500 uppercase tracking-wider px-6 py-3">
@@ -180,21 +184,19 @@ export default async function AdminDashboardPage() {
                     </td>
                     <td className="px-6 py-3.5">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium capitalize ${
-                          statusColors[order.order_status] ||
+                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium capitalize ${statusColors[order.order_status] ||
                           'bg-stone-100 text-stone-700'
-                        }`}
+                          }`}
                       >
                         {order.order_status}
                       </span>
                     </td>
                     <td className="px-6 py-3.5">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium capitalize ${
-                          order.payment_status === 'paid'
+                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium capitalize ${order.payment_status === 'paid'
                             ? 'bg-green-100 text-green-700'
                             : 'bg-yellow-100 text-yellow-700'
-                        }`}
+                          }`}
                       >
                         {order.payment_status}
                       </span>

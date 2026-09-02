@@ -2,8 +2,18 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 
 async function checkAdminAuth(supabase: any) {
+  try {
+    const cookieStore = await cookies()
+    if (cookieStore.get('admin_session')?.value === 'authenticated') {
+      return true
+    }
+  } catch {
+    // Ignore
+  }
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return false
 

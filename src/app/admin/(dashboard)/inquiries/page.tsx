@@ -5,9 +5,11 @@ export const metadata = {
   title: 'Contact Inquiries | Admin Dashboard',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminInquiriesPage() {
   const inquiries = await getInquiries()
-  const unreadCount = inquiries.filter(i => i.status === 'unread').length
+  const unreadCount = inquiries.filter(i => !i.is_resolved).length
 
   return (
     <div className="space-y-8">

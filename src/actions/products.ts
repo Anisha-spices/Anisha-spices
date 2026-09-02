@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -112,15 +113,17 @@ export async function updateProduct(
 }
 
 export async function deleteProduct(id: string): Promise<ActionResult> {
-  const supabase = await createClient()
+  const adminSupabase = createAdminClient()
 
-  const { error } = await supabase.from('products').delete().eq('id', id)
+  const { error } = await adminSupabase.from('products').delete().eq('id', id)
 
   if (error) {
     return { error: error.message }
   }
 
   revalidatePath('/admin/products')
+  revalidatePath('/shop')
+  revalidatePath('/')
   return { success: true }
 }
 
@@ -227,7 +230,7 @@ export async function deleteProductImage(imageId: string, productId: string): Pr
       .select('featured_image_url')
       .eq('id', productId)
       .single()
-      
+
     if (product?.featured_image_url === image.image_url) {
       // Find another image to feature
       const { data: nextImage } = await supabase
@@ -237,7 +240,7 @@ export async function deleteProductImage(imageId: string, productId: string): Pr
         .order('sort_order', { ascending: true })
         .limit(1)
         .single()
-        
+
       await supabase
         .from('products')
         .update({ featured_image_url: nextImage ? nextImage.image_url : null })

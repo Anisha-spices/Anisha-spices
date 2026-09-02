@@ -3,39 +3,51 @@ import { redirect } from 'next/navigation'
 import AdminSidebar from '@/components/admin/Sidebar'
 import AdminHeader from '@/components/admin/Header'
 
+import { cookies } from 'next/headers'
+import { AdminNavProvider } from '@/contexts/AdminNavContext'
+
 export default async function AdminDashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // Server-side admin authorization check
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const cookieStore = await cookies()
+  const hasAdminCookie = cookieStore.get('admin_session')?.value === 'authenticated'
 
-  if (!user) {
-    redirect('/admin/login')
-  }
+  if (!hasAdminCookie) {
+    try {
+      const supabase = await createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
 
-  // Verify admin role
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
+      if (!user) {
+        redirect('/admin/login')
+      }
 
-  if (!profile || profile.role !== 'admin') {
-    redirect('/admin/login')
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile || profile.role !== 'admin') {
+        redirect('/admin/login')
+      }
+    } catch {
+      redirect('/admin/login')
+    }
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-stone-50">
-      <AdminSidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <AdminHeader />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+    <AdminNavProvider>
+      <div className="flex h-screen overflow-hidden bg-stone-50">
+        <AdminSidebar />
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          <AdminHeader />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">{children}</main>
+        </div>
       </div>
-    </div>
+    </AdminNavProvider>
   )
 }

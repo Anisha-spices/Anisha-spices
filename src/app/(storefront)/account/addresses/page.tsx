@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { AddressList } from './_components/AddressList'
 
 export const metadata = {
-  title: 'My Addresses | Aura Masale',
+  title: 'My Addresses | Anisha Spices',
 }
 
 export default async function AccountAddressesPage() {
@@ -22,7 +22,7 @@ export default async function AccountAddressesPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="bg-white rounded-2xl border border-border p-6 lg:p-8 min-h-full">
+    <div className="bg-white rounded-3xl border border-stone-200/90 p-6 sm:p-8 lg:p-10 shadow-sm min-h-full">
       <AddressList addresses={addresses || []} />
     </div>
   )

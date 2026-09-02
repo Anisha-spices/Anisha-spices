@@ -13,7 +13,7 @@ export function InquiriesList({ initialInquiries }: { initialInquiries: any[] })
     startTransition(async () => {
       const res = await markInquiryAsRead(id)
       if (res.success) {
-        setInquiries(inquiries.map(inq => inq.id === id ? { ...inq, status: 'read' } : inq))
+        setInquiries(inquiries.map(inq => inq.id === id ? { ...inq, is_resolved: true } : inq))
       }
     })
   }
@@ -42,7 +42,7 @@ export function InquiriesList({ initialInquiries }: { initialInquiries: any[] })
   return (
     <div className="space-y-4">
       {inquiries.map((inquiry) => {
-        const isUnread = inquiry.status === 'unread'
+        const isUnread = !inquiry.is_resolved
         const isExpanded = expandedId === inquiry.id
 
         return (
@@ -69,7 +69,7 @@ export function InquiriesList({ initialInquiries }: { initialInquiries: any[] })
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3">
                     <p className={`text-sm truncate ${isUnread ? 'font-bold text-stone-900' : 'font-medium text-stone-700'}`}>
-                      {inquiry.first_name} {inquiry.last_name}
+                      {inquiry.name || `${inquiry.first_name || ''} ${inquiry.last_name || ''}`.trim() || 'Anonymous Customer'}
                     </p>
                     {isUnread && (
                       <span className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[10px] font-bold uppercase tracking-wider">

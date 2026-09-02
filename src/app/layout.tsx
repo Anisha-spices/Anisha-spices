@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -7,15 +7,21 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const playfair = Playfair_Display({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
+
 export const metadata: Metadata = {
   title: {
-    default: "Aura Masale — Premium Indian Spices",
-    template: "%s | Aura Masale",
+    default: "Anisha Spices — Pure Spice. Real Taste. Trusted Every Time.",
+    template: "%s | Anisha Spices",
   },
   description:
-    "Discover the finest Indian spices at Aura Masale. Premium quality whole spices, ground spices, and spice blends delivered to your doorstep.",
+    "Anisha Spices brings the richness of India's finest spices to your kitchen. Pure, natural & full of flavor.",
   icons: {
-    icon: '/logo.webp',
+    icon: '/images/logo.jpeg',
   },
 };
 
@@ -25,8 +31,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+    <html lang="en" data-scroll-behavior="smooth" className={`${inter.variable} ${playfair.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col font-sans bg-[#FAF6F2] text-[#2A1612] selection:bg-[#6B1118] selection:text-white">
+        {children}
+      </body>
     </html>
   );
 }

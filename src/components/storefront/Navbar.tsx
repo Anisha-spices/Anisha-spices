@@ -1,258 +1,618 @@
 'use client'
 
-import Link from 'next/link'
-import Image from 'next/image'
 import { useState, useRef, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Menu, Search, ShoppingCart, User, X } from 'lucide-react'
+import { createPortal } from 'react-dom'
+import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { ShoppingCart, User, Menu, X, ChevronDown, Search, ArrowRight, Loader2 } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
-import { Playfair_Display } from 'next/font/google'
 
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  weight: ['700'],
-})
+type NavLink = {
+  name: string
+  href: string
+  hasDropdown?: boolean
+  subItems?: { name: string; href: string }[]
+}
 
-export function Navbar({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const searchInputRef = useRef<HTMLInputElement>(null)
-  const router = useRouter()
+const defaultCategoryItems = [
+  { name: 'All Spices', href: '/shop' },
+  { name: 'Ground Spices', href: '/shop?category=ground-spices' },
+  { name: 'Blended Spices', href: '/shop?category=blended-spices' },
+  { name: 'Whole Spices (Khade Masale)', href: '/shop?category=whole-spices' },
+]
+
+export function Navbar({
+  isLoggedIn = false,
+  categories = [],
+}: {
+  isLoggedIn?: boolean
+  categories?: { name: string; slug: string }[]
+}) {
+  const dynamicSubItems = categories.length > 0
+    ? [
+        { name: 'All Spices', href: '/shop' },
+        ...categories.map((c) => ({ name: c.name, href: `/shop?category=${c.slug}` })),
+      ]
+    : defaultCategoryItems
+
+  const navLinks: NavLink[] = [
+    { name: 'Home', href: '/' },
+    {
+      name: 'Products',
+      href: '/shop',
+      hasDropdown: true,
+      subItems: dynamicSubItems,
+    },
+    { name: 'Uses', href: '/#uses' },
+    { name: 'About Us', href: '/about' },
+    { name: 'Contact', href: '/contact' },
+  ]
   const { itemCount } = useCart()
+  const pathname = usePathname()
+  const router = useRouter()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const [productsDropdownOpen, setProductsDropdownOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Live Search Suggestion State
+  const [desktopSearchQuery, setDesktopSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const searchContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (searchOpen && searchInputRef.current) {
-      searchInputRef.current.focus()
-    }
-  }, [searchOpen])
+    setMounted(true)
+  }, [])
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      setSearchOpen(false)
-      router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`)
-      setSearchQuery('')
+  // Live search debounce effect
+  useEffect(() => {
+    const trimmed = desktopSearchQuery.trim()
+    if (trimmed.length < 2) {
+      setSearchResults([])
+      setIsSearching(false)
+      return
+    }
+
+    setIsSearching(true)
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(trimmed)}`)
+        const json = await res.json()
+        setSearchResults(json.results || [])
+      } catch {
+        setSearchResults([])
+      } finally {
+        setIsSearching(false)
+      }
+    }, 200)
+
+    return () => clearTimeout(timer)
+  }, [desktopSearchQuery])
+
+  // Close search suggestions on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Scroll to top when clicking Home / Brand Logo
+  const handleHomeClick = (e: React.MouseEvent) => {
+    if (pathname === '/') {
+      e.preventDefault()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
-  const navLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'Shop', href: '/shop' },
-    { name: 'About', href: '/about' },
-    { name: 'Contact', href: '/contact' },
-  ]
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setProductsDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileMenuOpen(false)
+    setProductsDropdownOpen(false)
+  }, [pathname])
+
+  // Body scroll lock & ESC key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false)
+    }
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden'
+      window.addEventListener('keydown', handleKeyDown)
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [mobileMenuOpen])
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-[#F5E6C8] border-b border-[#E8B96A] shadow-sm">
-      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
-          
-          {/* Mobile Left: Hamburger */}
-          <div className="flex flex-1 items-center lg:hidden">
-            <button
-              type="button"
-              className="-ml-2 p-2 text-stone-800 hover:text-orange-600 transition-colors"
-              onClick={() => setMobileMenuOpen(true)}
-            >
-              <span className="sr-only">Open menu</span>
-              <Menu className="h-6 w-6" aria-hidden="true" />
-            </button>
-          </div>
+    <>
+      <header className="sticky top-0 z-40 w-full bg-[#6B1118] text-white shadow-lg border-b border-[#520C12] transition-all">
+        <nav className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
+          <div className="flex h-16 sm:h-20 items-center justify-between">
 
-          {/* Desktop Left: Logo */}
-          <div className="hidden lg:flex lg:flex-1 lg:items-center">
-            <Link href="/" className="-m-1.5 p-1.5 flex items-center gap-3">
-              <span className="sr-only">Aura Masale</span>
-              <Image
-                src="/logo.webp"
-                alt="Aura Masale Logo"
-                width={240}
-                height={80}
-                className="h-16 w-auto"
-                priority
-              />
-              <span className={`${playfair.className} text-stone-900 text-2xl font-bold tracking-wide uppercase hidden xl:block`}>
-                Aura Masale
-              </span>
-            </Link>
-          </div>
-
-          {/* Mobile Center: Logo */}
-          <div className="flex justify-center lg:hidden">
-            <Link href="/" className="-m-1.5 p-1.5">
-              <span className="sr-only">Aura Masale</span>
-              <Image
-                src="/logo.webp"
-                alt="Aura Masale Logo"
-                width={200}
-                height={64}
-                className="h-16 w-auto object-contain scale-110 origin-center"
-                priority
-              />
-            </Link>
-          </div>
-
-          {/* Desktop Center: Nav Links */}
-          <div className="hidden lg:flex lg:gap-x-10">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="text-base font-semibold leading-6 text-stone-800 hover:text-orange-600 transition-colors uppercase tracking-wider"
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
-
-          {/* Right: Search, Cart & Account */}
-          <div className="flex flex-1 items-center justify-end gap-x-4 sm:gap-x-6 lg:ml-10">
-            
-            {/* Desktop Inline Search */}
-            <form onSubmit={handleSearchSubmit} className="hidden lg:flex relative w-full max-w-xs xl:max-w-md mr-4">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search spices..."
-                className="w-full rounded-full border border-[#E8B96A] bg-stone-50 py-2 pl-4 pr-10 text-sm text-stone-800 focus:outline-none focus:ring-1 focus:ring-[#E8B96A] focus:border-[#E8B96A] transition-all placeholder:text-stone-500 shadow-inner"
-              />
-              <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-orange-600 transition-colors">
-                <Search className="h-4 w-4" />
-              </button>
-            </form>
-
-            {/* Mobile Search Icon */}
-            <button 
-              onClick={() => setSearchOpen(!searchOpen)}
-              className="lg:hidden text-stone-800 hover:text-orange-600 transition-colors p-2 -mr-2"
-            >
-              <span className="sr-only">Search</span>
-              {searchOpen ? <X className="h-5 w-5 sm:h-6 sm:w-6" /> : <Search className="h-5 w-5 sm:h-6 sm:w-6" />}
-            </button>
-            
-            <div className="hidden lg:block w-px h-6 bg-stone-200"></div>
-            
-            {/* Desktop Auth/Account */}
-            <div className="hidden lg:flex items-center gap-4">
-              {isLoggedIn ? (
-                <Link href="/account" className="text-stone-800 hover:text-orange-600 transition-colors p-2 flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  <span className="text-sm font-medium">Account</span>
-                </Link>
-              ) : (
-                <div className="flex items-center gap-4">
-                  <Link href="/login" className="text-sm font-semibold text-white bg-orange-600 hover:bg-orange-500 px-5 py-2 rounded-md transition-colors shadow-sm shadow-orange-600/20 whitespace-nowrap">
-                    Login / Sign up
-                  </Link>
+            {/* Brand Logo & Name (Full Left on Mobile, Left on Desktop) */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Link href="/" onClick={handleHomeClick} className="group flex items-center gap-2 sm:gap-2.5">
+                {/* Official Brand Logo */}
+                <div className="relative w-9 h-9 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-[#E5AD58]/50 group-hover:scale-105 transition-transform shadow-md shrink-0 bg-black">
+                  <Image
+                    src="/images/logo.jpeg"
+                    alt="Anisha Spices Logo"
+                    fill
+                    priority
+                    className="object-cover"
+                    sizes="(max-width: 640px) 36px, 48px"
+                  />
                 </div>
-              )}
+                <div className="flex flex-col">
+                  <span className="font-serif text-lg sm:text-2xl font-bold tracking-tight text-white group-hover:text-[#E5AD58] transition-colors leading-tight">
+                    Anisha
+                  </span>
+                  <span className="text-[8px] sm:text-[10px] tracking-[0.25em] uppercase font-semibold text-[#E5AD58] -mt-0.5">
+                    Spices
+                  </span>
+                </div>
+              </Link>
             </div>
 
-            {/* Cart Icon */}
-            <Link href="/cart" className="group flex items-center text-stone-800 hover:text-orange-600 transition-colors p-2 -mr-2 lg:mr-0 relative">
-              <span className="sr-only">Cart</span>
-              <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6" />
-              {itemCount > 0 && (
-                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-orange-600 rounded-full shadow-sm shadow-orange-600/30">
-                  {itemCount > 99 ? '99+' : itemCount}
-                </span>
-              )}
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      {/* Search Overlay/Bar */}
-      <div 
-        className={`absolute top-full left-0 w-full bg-white border-b border-stone-200 shadow-md overflow-hidden transition-all duration-300 ease-in-out ${
-          searchOpen ? 'max-h-24 opacity-100 py-4' : 'max-h-0 opacity-0 py-0'
-        }`}
-      >
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <form onSubmit={handleSearchSubmit} className="relative">
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search for spices, blends..."
-              className="w-full rounded-full border border-[#E8B96A] bg-white py-3 pl-5 pr-12 text-stone-900 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-inner"
-            />
-            <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-stone-500 hover:text-orange-600 transition-colors">
-              <Search className="h-5 w-5" />
-            </button>
-          </form>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
-          <div className="fixed inset-y-0 left-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm border-r border-stone-200">
-            <div className="flex items-center justify-between">
-              <Link href="/" className="-m-1.5 p-1.5" onClick={() => setMobileMenuOpen(false)}>
-                <span className="sr-only">Aura Masale</span>
-                <Image
-                  src="/logo.webp"
-                  alt="Aura Masale Logo"
-                  width={200}
-                  height={64}
-                  className="h-12 w-auto"
-                />
-              </Link>
-              <button
-                type="button"
-                className="-m-2.5 rounded-md p-2.5 text-stone-800 hover:text-orange-600 hover:bg-stone-50 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span className="sr-only">Close menu</span>
-                <X className="h-6 w-6" aria-hidden="true" />
-              </button>
-            </div>
-            <div className="mt-6 flow-root">
-              <div className="-my-6 divide-y divide-stone-100">
-                <div className="space-y-2 py-6">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.name}
-                      href={link.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-stone-800 hover:bg-stone-50 hover:text-orange-600 transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  ))}
-                </div>
-                <div className="py-6">
-                  {isLoggedIn ? (
-                    <Link
-                      href="/account"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="-mx-3 flex items-center gap-x-3 rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-stone-800 hover:bg-stone-50 hover:text-orange-600 transition-colors"
-                    >
-                      <User className="h-5 w-5" />
-                      Account
-                    </Link>
-                  ) : (
-                    <div className="mt-4 flex flex-col gap-3">
-                      <Link
-                        href="/login"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="block w-full text-center rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-white bg-orange-600 hover:bg-orange-500 transition-colors shadow-sm shadow-orange-600/20"
+            {/* Desktop Navigation Links */}
+            <div className="hidden lg:flex lg:items-center lg:gap-7">
+              {navLinks.map((link) => {
+                if (link.hasDropdown) {
+                  return (
+                    <div key={link.name} className="relative" ref={dropdownRef}>
+                      <button
+                        onClick={() => setProductsDropdownOpen(!productsDropdownOpen)}
+                        className="flex items-center gap-1 text-[15px] font-medium text-stone-100 hover:text-[#E5AD58] transition-colors py-2 cursor-pointer"
                       >
-                        Login / Sign up
-                      </Link>
+                        {link.name}
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform duration-200 ${productsDropdownOpen ? 'rotate-180 text-[#E5AD58]' : 'text-stone-300'
+                            }`}
+                        />
+                      </button>
+                      {productsDropdownOpen && (
+                        <div className="absolute top-full left-0 mt-1 w-52 rounded-xl bg-white text-[#2A1612] shadow-2xl border border-[#E8DFD5] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                          {link.subItems?.map((subItem) => (
+                            <Link
+                              key={subItem.name}
+                              href={subItem.href}
+                              onClick={() => setProductsDropdownOpen(false)}
+                              className="block px-4 py-2 text-sm text-[#2A1612] hover:bg-[#FAF6F2] hover:text-[#6B1118] font-medium transition-colors"
+                            >
+                              {subItem.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
                     </div>
+                  )
+                }
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={(e) => {
+                      if (link.href === '/') {
+                        handleHomeClick(e)
+                      } else if (link.href.startsWith('/#')) {
+                        const targetId = link.href.replace('/#', '')
+                        const el = document.getElementById(targetId)
+                        if (el) {
+                          e.preventDefault()
+                          el.scrollIntoView({ behavior: 'smooth' })
+                          window.history.replaceState(null, '', `/#${targetId}`)
+                        }
+                      }
+                    }}
+                    className="text-[15px] font-medium text-stone-100 hover:text-[#E5AD58] transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                )
+              })}
+            </div>
+
+            {/* Right Side: Desktop Search & Actions + Mobile Hamburger */}
+            <div className="flex items-center gap-2 sm:gap-4">
+              
+              {/* Desktop Search Bar with Live Auto-complete Suggestions (Hidden on Mobile) */}
+              <div className="hidden lg:block relative" ref={searchContainerRef}>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    if (desktopSearchQuery.trim()) {
+                      setShowSuggestions(false)
+                      router.push(`/shop?q=${encodeURIComponent(desktopSearchQuery.trim())}`)
+                    }
+                  }}
+                  className="flex items-center relative group"
+                >
+                  <input
+                    name="q"
+                    type="text"
+                    autoComplete="off"
+                    value={desktopSearchQuery}
+                    onChange={(e) => {
+                      setDesktopSearchQuery(e.target.value)
+                      setShowSuggestions(true)
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    placeholder="Search pure spices, blends..."
+                    className="w-56 xl:w-72 pl-10 pr-9 py-2 rounded-full bg-white/10 hover:bg-white/15 border border-white/25 text-sm text-white placeholder-stone-300/80 focus:outline-none focus:ring-2 focus:ring-[#E5AD58] focus:border-[#E5AD58] focus:bg-white/20 focus:w-80 transition-all shadow-inner"
+                  />
+                  <Search className="w-4 h-4 text-[#E5AD58] group-focus-within:text-white absolute left-3.5 pointer-events-none transition-colors" />
+                  {isSearching ? (
+                    <Loader2 className="w-3.5 h-3.5 text-[#E5AD58] animate-spin absolute right-3.5" />
+                  ) : desktopSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDesktopSearchQuery('')
+                        setSearchResults([])
+                      }}
+                      className="absolute right-3 text-stone-300 hover:text-white"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
                   )}
-                </div>
+                </form>
+
+                {/* Floating Live Suggestions Dropdown */}
+                {showSuggestions && desktopSearchQuery.trim().length >= 2 && (
+                  <div className="absolute top-full right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white text-[#2A1612] shadow-2xl border border-[#E8DFD5] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="px-4 py-2.5 bg-[#FAF6F2] border-b border-[#E8DFD5] flex items-center justify-between">
+                      <span className="text-[11px] uppercase tracking-wider font-bold text-[#8C7567]">
+                        Products ({searchResults.length})
+                      </span>
+                      <span className="text-[11px] text-[#A0887A]">Press enter to view all</span>
+                    </div>
+
+                    {searchResults.length === 0 && !isSearching ? (
+                      <div className="p-6 text-center text-sm text-[#8C7567]">
+                        No spices found for &ldquo;<span className="font-bold text-[#2A1612]">{desktopSearchQuery}</span>&rdquo;
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-[#F2E8DC] max-h-80 overflow-y-auto">
+                        {searchResults.map((item) => (
+                          <Link
+                            key={item.id}
+                            href={`/product/${item.slug}`}
+                            onClick={() => setShowSuggestions(false)}
+                            className="flex items-center gap-3 p-3 hover:bg-[#FAF6F2] transition-colors group"
+                          >
+                            <div className="w-11 h-11 relative rounded-xl overflow-hidden bg-[#FAF3EB] shrink-0 border border-[#E8DFD5]">
+                              <Image
+                                src={item.image}
+                                alt={item.name}
+                                fill
+                                sizes="44px"
+                                className="object-cover group-hover:scale-105 transition-transform"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-xs sm:text-sm font-semibold text-[#2A1612] truncate group-hover:text-[#6B1118] transition-colors">
+                                {item.name}
+                              </h4>
+                              {item.price && (
+                                <p className="text-[11px] font-bold text-[#6B1118]">
+                                  From ₹{item.price}
+                                </p>
+                              )}
+                            </div>
+                            <ArrowRight className="w-4 h-4 text-stone-300 group-hover:text-[#6B1118] group-hover:translate-x-0.5 transition-all shrink-0" />
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+
+                    {searchResults.length > 0 && (
+                      <Link
+                        href={`/shop?q=${encodeURIComponent(desktopSearchQuery.trim())}`}
+                        onClick={() => setShowSuggestions(false)}
+                        className="block text-center py-2.5 bg-[#FAF6F2] hover:bg-[#F2E8DC] text-xs font-bold text-[#6B1118] border-t border-[#E8DFD5] transition-colors"
+                      >
+                        View all results for &ldquo;{desktopSearchQuery}&rdquo; →
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Desktop "Shop Now" Pill Button (Left of Cart) */}
+              <Link
+                href="/shop"
+                className="hidden lg:inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-bold text-[#6B1118] shadow-md hover:bg-[#FAF6F0] hover:text-[#520C12] hover:shadow-lg transition-all transform hover:-translate-y-0.5"
+              >
+                Shop Now
+              </Link>
+
+              {/* Cart Icon (Middle - Left of Profile) */}
+              <Link
+                href="/cart"
+                className="relative p-2 text-stone-100 hover:text-[#E5AD58] transition-colors hidden lg:block"
+                aria-label="Shopping Cart"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                <span className="absolute top-0.5 right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#E5AD58] px-1 text-[10px] font-bold text-[#2A1612] shadow-sm">
+                  {itemCount}
+                </span>
+              </Link>
+
+              {/* Account Link (Far Right) */}
+              <Link
+                href={isLoggedIn ? '/account' : '/login'}
+                className="p-2 text-stone-100 hover:text-[#E5AD58] transition-colors rounded-full hover:bg-white/10 hidden lg:block"
+                title={isLoggedIn ? 'Account' : 'Sign In'}
+              >
+                <User className="h-5 w-5" />
+              </Link>
+
+              {/* Mobile Right: Quick Search Button & Hamburger Menu */}
+              <div className="flex items-center gap-1 lg:hidden">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileSearchOpen(true)
+                    setShowSuggestions(true)
+                  }}
+                  className="flex h-10 w-10 items-center justify-center rounded-xl text-white hover:text-[#E5AD58] hover:bg-white/10 active:scale-90 transition-all cursor-pointer"
+                  aria-label="Search Spices"
+                >
+                  <Search className="h-5 w-5" />
+                </button>
+
+                <button
+                  type="button"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl text-white hover:text-[#E5AD58] hover:bg-white/10 active:scale-90 transition-all focus:outline-none cursor-pointer"
+                  onClick={() => setMobileMenuOpen((prev) => !prev)}
+                  aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                >
+                  {mobileMenuOpen ? (
+                    <X className="h-6 w-6" />
+                  ) : (
+                    <Menu className="h-6 w-6" />
+                  )}
+                </button>
               </div>
             </div>
           </div>
-        </div>
+        </nav>
+      </header>
+
+      {/* Mobile Live Search Modal (Full Desktop-Grade Search Experience) */}
+      {mounted && mobileSearchOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[99999] lg:hidden animate-in fade-in duration-200">
+          <div
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm"
+            onClick={() => setMobileSearchOpen(false)}
+          />
+
+          <div className="fixed top-0 inset-x-0 bg-[#520C12] text-white p-4 shadow-2xl z-[100000] border-b border-white/15">
+            <div className="flex items-center gap-3">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  if (desktopSearchQuery.trim()) {
+                    setMobileSearchOpen(false)
+                    router.push(`/shop?q=${encodeURIComponent(desktopSearchQuery.trim())}`)
+                  }
+                }}
+                className="flex-1 relative flex items-center"
+              >
+                <Search className="w-4 h-4 text-[#E5AD58] absolute left-3.5 pointer-events-none" />
+                <input
+                  type="text"
+                  autoFocus
+                  autoComplete="off"
+                  value={desktopSearchQuery}
+                  onChange={(e) => {
+                    setDesktopSearchQuery(e.target.value)
+                    setShowSuggestions(true)
+                  }}
+                  placeholder="Search pure spices, blends..."
+                  className="w-full pl-10 pr-9 py-2.5 rounded-full bg-white/10 border border-white/25 text-sm text-white placeholder-stone-300/80 focus:outline-none focus:ring-2 focus:ring-[#E5AD58] focus:bg-white/20"
+                />
+                {isSearching ? (
+                  <Loader2 className="w-4 h-4 text-[#E5AD58] animate-spin absolute right-3" />
+                ) : desktopSearchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDesktopSearchQuery('')
+                      setSearchResults([])
+                    }}
+                    className="absolute right-3 text-stone-300 hover:text-white"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </form>
+
+              <button
+                type="button"
+                onClick={() => setMobileSearchOpen(false)}
+                className="p-2 text-white/80 hover:text-white text-xs font-semibold uppercase tracking-wider"
+              >
+                Cancel
+              </button>
+            </div>
+
+            {/* Live Search Suggestions Dropdown */}
+            {desktopSearchQuery.trim().length >= 2 && (
+              <div className="mt-3 bg-white rounded-2xl text-[#2A1612] overflow-hidden shadow-xl max-h-72 overflow-y-auto">
+                {searchResults.length === 0 && !isSearching ? (
+                  <div className="p-4 text-center text-xs text-[#8C7567]">
+                    No spices found for &ldquo;<strong>{desktopSearchQuery}</strong>&rdquo;
+                  </div>
+                ) : (
+                  <div className="divide-y divide-[#F2E8DC]">
+                    {searchResults.map((item) => (
+                      <Link
+                        key={item.id}
+                        href={`/product/${item.slug}`}
+                        onClick={() => {
+                          setMobileSearchOpen(false)
+                          setDesktopSearchQuery('')
+                        }}
+                        className="flex items-center gap-3 p-2.5 hover:bg-[#FAF6F2] transition-colors"
+                      >
+                        <div className="w-10 h-10 relative rounded-xl overflow-hidden bg-[#FAF3EB] shrink-0 border border-[#E8DFD5]">
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            fill
+                            sizes="40px"
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-xs font-bold text-[#2A1612] truncate">
+                            {item.name}
+                          </h4>
+                          {item.price && (
+                            <p className="text-[11px] font-bold text-[#7B111A]">
+                              From ₹{item.price}
+                            </p>
+                          )}
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-stone-300 shrink-0" />
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
       )}
-    </header>
+
+      {/* Render Mobile Drawer via Portal if mounted and open */}
+      {mounted && mobileMenuOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[99999] lg:hidden">
+          {/* Backdrop overlay */}
+          <div
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+
+          {/* Drawer content (Slides in from the Right) */}
+          <div className="fixed inset-y-0 right-0 z-[100000] w-[85%] max-w-xs bg-[#520C12] text-white p-6 shadow-2xl overflow-y-auto flex flex-col justify-between animate-in slide-in-from-right duration-250 ease-out">
+            <div>
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-white/15 pb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="relative w-8 h-8 rounded-full overflow-hidden border border-[#E5AD58]/50 shrink-0 bg-black">
+                    <Image
+                      src="/images/logo.jpeg"
+                      alt="Anisha Spices Logo"
+                      fill
+                      className="object-cover"
+                      sizes="32px"
+                    />
+                  </div>
+                  <span className="font-serif text-lg font-bold text-white">Anisha Spices</span>
+                </div>
+                <button
+                  type="button"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-white hover:text-[#E5AD58] hover:bg-white/10 transition-colors focus:outline-none cursor-pointer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-label="Close menu"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              {/* Navigation Links (Excludes Products since it's already in the main bottom bar) */}
+              <div className="mt-6 flex flex-col space-y-3">
+                {navLinks
+                  .filter((link) => link.name !== 'Products')
+                  .map((link) => (
+                  <div key={link.name}>
+                    <Link
+                      href={link.href}
+                      onClick={(e) => {
+                        setMobileMenuOpen(false)
+                        if (link.href === '/') handleHomeClick(e)
+                      }}
+                      className="block text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-1.5"
+                    >
+                      {link.name}
+                    </Link>
+                    {link.hasDropdown && (
+                      <div className="pl-4 mt-1.5 space-y-2 border-l-2 border-white/20">
+                        {link.subItems?.map((subItem) => (
+                          <Link
+                            key={subItem.name}
+                            href={subItem.href}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="block text-sm text-stone-300 hover:text-white transition-colors py-1"
+                          >
+                            {subItem.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {/* Your Orders Link in Hamburger Menu (Normal style like other links) */}
+                <div>
+                  <Link
+                    href="/account/orders"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-1.5"
+                  >
+                    Your Orders
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom CTA Buttons */}
+            <div className="mt-8 pt-6 border-t border-white/15 space-y-3">
+              <Link
+                href="/shop"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full block text-center rounded-full bg-[#E5AD58] py-3 text-sm font-bold text-[#2A1612] shadow-md hover:bg-[#d99f47] transition-colors"
+              >
+                Shop Now
+              </Link>
+              <Link
+                href={isLoggedIn ? '/account' : '/login'}
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full block text-center rounded-full border border-white/40 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
+              >
+                {isLoggedIn ? 'My Account' : 'Sign In'}
+              </Link>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
   )
 }

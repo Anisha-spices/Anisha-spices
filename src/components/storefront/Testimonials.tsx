@@ -83,7 +83,7 @@ export function Testimonials() {
         <div className="flex items-end justify-between mb-12">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-stone-900 mb-4">Loved by Kitchens Everywhere</h2>
-            <p className="text-stone-600 text-lg">Don't just take our word for it. Hear what our customers have to say.</p>
+            <p className="text-stone-600 text-lg">Don&apos;t just take our word for it. Hear what our customers have to say.</p>
           </div>
           
           {/* Navigation Arrows (Desktop) */}
@@ -143,7 +143,7 @@ export function Testimonials() {
                     ))}
                   </div>
                   <p className="text-stone-700 text-lg leading-relaxed mb-8">
-                    "{review.text}"
+                    &ldquo;{review.text}&rdquo;
                   </p>
                 </div>
                 <div className="flex items-center gap-4">

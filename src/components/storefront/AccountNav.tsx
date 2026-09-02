@@ -24,14 +24,14 @@ export function AccountNav({ isAdmin }: { isAdmin?: boolean }) {
   ]
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col divide-y divide-[#F2E8DC]">
       {isAdmin && (
         <Link
           href="/admin"
-          className="flex items-center gap-3 px-6 py-4 text-sm font-medium transition-colors border-b border-border text-orange-600 hover:bg-orange-50 border-l-4 border-l-transparent pl-5"
+          className="flex items-center gap-3 px-6 py-4 text-xs sm:text-sm font-bold transition-colors text-amber-700 bg-[#FAF6F2] hover:bg-[#F2E8DC]"
         >
-          <LayoutDashboard className="w-5 h-5" />
-          Admin Dashboard
+          <LayoutDashboard className="w-4 h-4 text-[#C89B65]" />
+          <span>Admin Dashboard</span>
         </Link>
       )}
 
@@ -43,24 +43,24 @@ export function AccountNav({ isAdmin }: { isAdmin?: boolean }) {
           <Link
             key={link.name}
             href={link.href}
-            className={`flex items-center gap-3 px-6 py-4 text-sm font-medium transition-colors border-b border-border last:border-0 ${
+            className={`flex items-center gap-3 px-6 py-4 text-xs sm:text-sm font-bold transition-all ${
               isActive 
-                ? 'bg-primary/5 text-primary border-l-4 border-l-primary pl-5' 
-                : 'text-text hover:bg-surface-dark hover:text-primary border-l-4 border-l-transparent pl-5'
+                ? 'bg-[#FAF6F2] text-[#7B111A] border-l-4 border-l-[#7B111A] pl-5' 
+                : 'text-[#5A433B] hover:bg-[#FAF6F2]/60 hover:text-[#7B111A] border-l-4 border-l-transparent pl-5'
             }`}
           >
-            <Icon className="w-5 h-5" />
-            {link.name}
+            <Icon className={`w-4 h-4 ${isActive ? 'text-[#7B111A]' : 'text-[#8C7567]'}`} />
+            <span>{link.name}</span>
           </Link>
         )
       })}
       
       <button
         onClick={handleLogout}
-        className="flex items-center gap-3 px-6 py-4 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors border-l-4 border-l-transparent pl-5 w-full text-left"
+        className="flex items-center gap-3 px-6 py-4 text-xs sm:text-sm font-bold text-rose-700 hover:bg-rose-50 transition-colors border-l-4 border-l-transparent pl-5 w-full text-left cursor-pointer"
       >
-        <LogOut className="w-5 h-5" />
-        Logout
+        <LogOut className="w-4 h-4 text-rose-600" />
+        <span>Sign Out</span>
       </button>
     </div>
   )

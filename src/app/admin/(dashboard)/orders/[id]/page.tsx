@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, User, MapPin, Package, CreditCard } from 'lucide-react'
@@ -15,7 +17,9 @@ export default async function AdminOrderDetailsPage({
 }) {
   const resolvedParams = await params
   const orderId = resolvedParams.id
-  const supabase = await createClient()
+  const cookieStore = await cookies()
+  const isAdminCookie = cookieStore.get('admin_session')?.value === 'authenticated'
+  const supabase = isAdminCookie ? createAdminClient() : await createClient()
 
   // Fetch Order Details
   const { data: order } = await supabase
@@ -89,14 +93,19 @@ export default async function AdminOrderDetailsPage({
                 <MapPin className="w-5 h-5 text-stone-400" />
                 Shipping Address
               </h3>
-              {order.addresses ? (
-                <div className="space-y-1 text-sm text-stone-600">
-                  <p className="font-medium text-stone-900 mb-1">{order.addresses.full_name}</p>
-                  <p>{order.addresses.address_line_1}</p>
-                  {order.addresses.address_line_2 && <p>{order.addresses.address_line_2}</p>}
-                  <p>{order.addresses.city}, {order.addresses.state} {order.addresses.postal_code}</p>
-                  <p className="mt-2 pt-2 border-t border-stone-100">Phone: {order.addresses.phone}</p>
-                </div>
+              {order.shipping_address || order.addresses ? (
+                (() => {
+                  const addr = order.shipping_address || order.addresses
+                  return (
+                    <div className="space-y-1 text-sm text-stone-600">
+                      <p className="font-medium text-stone-900 mb-1">{addr.full_name}</p>
+                      <p>{addr.address_line_1}</p>
+                      {addr.address_line_2 && <p>{addr.address_line_2}</p>}
+                      <p>{addr.city}, {addr.state} {addr.postal_code}</p>
+                      <p className="mt-2 pt-2 border-t border-stone-100">Phone: {addr.phone}</p>
+                    </div>
+                  )
+                })()
               ) : (
                 <p className="text-sm text-stone-500 italic">No address details available.</p>
               )}

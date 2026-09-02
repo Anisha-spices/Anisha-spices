@@ -21,13 +21,12 @@ export async function submitInquiry(formData: FormData) {
   }
 
   const { error } = await supabase
-    .from('contact_inquiries')
+    .from('inquiries')
     .insert([{
-      first_name,
-      last_name,
-      email,
-      message,
-      status: 'unread'
+      name: `${first_name.trim()} ${last_name.trim()}`.trim(),
+      email: email.trim().toLowerCase(),
+      message: message.trim(),
+      is_resolved: false,
     }])
 
   if (error) {

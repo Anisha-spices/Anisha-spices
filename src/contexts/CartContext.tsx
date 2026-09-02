@@ -44,5 +44,9 @@ export function CartProvider({
 }
 
 export function useCart() {
-  return useContext(CartContext)
+  const context = useContext(CartContext)
+  if (!context) {
+    return { itemCount: 0, refreshCart: () => {} }
+  }
+  return context
 }

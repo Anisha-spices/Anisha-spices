@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { LogOut, User } from 'lucide-react'
 import { logout } from '@/actions/auth'
+import { MobileMenuTrigger } from './MobileMenuTrigger'
 
 export default async function AdminHeader() {
   const supabase = await createClient()
@@ -9,9 +10,10 @@ export default async function AdminHeader() {
   } = await supabase.auth.getUser()
 
   return (
-    <header className="h-16 bg-white border-b border-stone-200 flex items-center justify-between px-6 shrink-0">
-      <div>
-        <h2 className="text-lg font-semibold text-stone-900">
+    <header className="h-16 bg-white border-b border-stone-200 flex items-center justify-between px-4 sm:px-6 shrink-0 z-30">
+      <div className="flex items-center gap-3">
+        <MobileMenuTrigger />
+        <h2 className="text-base sm:text-lg font-semibold text-stone-900 truncate">
           Admin Dashboard
         </h2>
       </div>

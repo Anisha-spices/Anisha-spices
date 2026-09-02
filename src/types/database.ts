@@ -140,6 +140,16 @@ export interface Order {
   payment_status: PaymentStatus
   order_status: OrderStatus
   payment_method: string | null
+  shipping_address?: {
+    full_name: string
+    phone: string
+    address_line_1: string
+    address_line_2?: string | null
+    city: string
+    state: string
+    postal_code: string
+    country: string
+  } | null
   razorpay_order_id: string | null
   razorpay_payment_id: string | null
   created_at: string

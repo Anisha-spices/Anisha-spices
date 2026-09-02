@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { Eye, Search, Filter } from 'lucide-react'
 
@@ -7,7 +9,9 @@ export const metadata = {
 }
 
 export default async function AdminOrdersPage() {
-  const supabase = await createClient()
+  const cookieStore = await cookies()
+  const isAdminCookie = cookieStore.get('admin_session')?.value === 'authenticated'
+  const supabase = isAdminCookie ? createAdminClient() : await createClient()
 
   // Fetch all orders with user profile info
   const { data: orders } = await supabase
@@ -49,7 +53,7 @@ export default async function AdminOrdersPage() {
       {/* Orders Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-stone-200/60 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
+          <table className="w-full min-w-[680px] text-left text-sm whitespace-nowrap">
             <thead className="bg-stone-50 text-stone-500 uppercase tracking-wider text-xs border-b border-stone-200/60">
               <tr>
                 <th className="px-6 py-4 font-semibold">Order</th>
@@ -81,8 +85,12 @@ export default async function AdminOrdersPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="font-medium text-stone-900">{order.profiles?.full_name || 'Guest'}</span>
-                        <span className="text-xs text-stone-500">{order.profiles?.email}</span>
+                        <span className="font-medium text-stone-900">
+                          {order.shipping_address?.full_name || order.profiles?.full_name || 'Guest'}
+                        </span>
+                        <span className="text-xs text-stone-500">
+                          {order.shipping_address?.phone || order.profiles?.email || ''}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">

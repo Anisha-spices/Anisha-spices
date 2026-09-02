@@ -36,7 +36,7 @@ export async function addToCart(variantId: string, quantity: number = 1) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  
+
   if (!user) {
     // Guest cart flow
     const cart = await getGuestCart()
@@ -90,7 +90,7 @@ export async function removeFromCart(cartItemId: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  
+
   if (!user) {
     // Guest cart flow
     let cart = await getGuestCart()
@@ -116,7 +116,7 @@ export async function updateCartQuantity(cartItemId: string, quantity: number) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  
+
   if (!user) {
     if (quantity <= 0) {
       return removeFromCart(cartItemId)
@@ -149,105 +149,121 @@ export async function updateCartQuantity(cartItemId: string, quantity: number) {
 }
 
 export async function getCart() {
-  const supabase = await createClient()
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  if (!user) {
-    const cart = await getGuestCart()
-    if (cart.length === 0) return { success: true, items: [] }
+    if (!user) {
+      const cart = await getGuestCart()
+      if (cart.length === 0) return { success: true, items: [] }
 
-    const variantIds = cart.map(i => i.variant_id)
-    
-    // Fetch variant details for guest cart
+      const variantIds = cart.map(i => i.variant_id)
+
+      // Fetch variant details for guest cart
+      const { data, error } = await supabase
+        .from('product_variants')
+        .select(`
+          id,
+          variant_name,
+          price,
+          original_price,
+          stock_quantity,
+          is_active,
+          product_id,
+          products (
+            id,
+            name,
+            slug,
+            featured_image_url
+          )
+        `)
+        .in('id', variantIds)
+
+      if (error) return { success: true, items: [] }
+
+      // Map cookies array back to cart items shape
+      const items = cart.map(item => {
+        const variant = data?.find(v => v.id === item.variant_id)
+        return {
+          id: item.id,
+          quantity: item.quantity,
+          variant_id: item.variant_id,
+          product_variants: variant || null
+        }
+      }).filter(i => i.product_variants !== null)
+
+      items.sort((a, b) => {
+        const aCartItem = cart.find(i => i.id === a.id);
+        const bCartItem = cart.find(i => i.id === b.id);
+        return (bCartItem?.created_at || 0) - (aCartItem?.created_at || 0);
+      })
+
+      return { success: true, items }
+    }
+
     const { data, error } = await supabase
-      .from('product_variants')
+      .from('cart_items')
       .select(`
         id,
-        variant_name,
-        price,
-        original_price,
-        stock_quantity,
-        is_active,
-        product_id,
-        products (
+        quantity,
+        variant_id,
+        product_variants (
           id,
-          name,
-          slug,
-          featured_image_url
+          variant_name,
+          price,
+          original_price,
+          stock_quantity,
+          is_active,
+          product_id,
+          products (
+            id,
+            name,
+            slug,
+            featured_image_url
+          )
         )
       `)
-      .in('id', variantIds)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
 
-    if (error) return { success: false, error: error.message, items: [] }
+    if (error) return { success: true, items: [] }
 
-    // Map cookies array back to cart items shape
-    const items = cart.map(item => {
-      const variant = data?.find(v => v.id === item.variant_id)
-      return {
-        id: item.id,
-        quantity: item.quantity,
-        variant_id: item.variant_id,
-        product_variants: variant || null
-      }
-    }).filter(i => i.product_variants !== null) // Filter out deleted variants
-
-    // Sort by created_at descending (newest first)
-    items.sort((a, b) => {
-      const aCartItem = cart.find(i => i.id === a.id);
-      const bCartItem = cart.find(i => i.id === b.id);
-      return (bCartItem?.created_at || 0) - (aCartItem?.created_at || 0);
-    })
-
-    return { success: true, items }
+    return { success: true, items: data || [] }
+  } catch {
+    const cart = await getGuestCart()
+    return { success: true, items: [] }
   }
-
-  const { data, error } = await supabase
-    .from('cart_items')
-    .select(`
-      id,
-      quantity,
-      variant_id,
-      product_variants (
-        id,
-        variant_name,
-        price,
-        original_price,
-        stock_quantity,
-        is_active,
-        product_id,
-        products (
-          id,
-          name,
-          slug,
-          featured_image_url
-        )
-      )
-    `)
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-
-  if (error) return { success: false, error: error.message, items: [] }
-
-  return { success: true, items: data || [] }
 }
 
 export async function getCartCount() {
-  const supabase = await createClient()
+  try {
+    const cookieStore = await cookies()
+    const allCookies = cookieStore.getAll()
+    const hasAuthCookie = allCookies.some(c => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'))
 
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  if (!user) {
+    if (!hasAuthCookie) {
+      const cart = await getGuestCart()
+      return cart.reduce((sum, item) => sum + item.quantity, 0)
+    }
+
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      const cart = await getGuestCart()
+      return cart.reduce((sum, item) => sum + item.quantity, 0)
+    }
+
+    const { data } = await supabase
+      .from('cart_items')
+      .select('quantity')
+      .eq('user_id', user.id)
+
+    if (!data) return 0
+
+    return data.reduce((sum, item) => sum + item.quantity, 0)
+  } catch {
     const cart = await getGuestCart()
     return cart.reduce((sum, item) => sum + item.quantity, 0)
   }
-
-  const { data } = await supabase
-    .from('cart_items')
-    .select('quantity')
-    .eq('user_id', user.id)
-
-  if (!data) return 0
-
-  return data.reduce((sum, item) => sum + item.quantity, 0)
 }

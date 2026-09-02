@@ -10,18 +10,28 @@ import { ProductCard } from '@/components/storefront/ProductCard'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const supabase = await createClient()
-  const { data: product } = await supabase
-    .from('products')
-    .select('seo_title, seo_description, name, short_description')
-    .eq('slug', slug)
-    .single()
+  try {
+    const supabase = await createClient()
+    const { data: product } = await supabase
+      .from('products')
+      .select('seo_title, seo_description, name, short_description')
+      .eq('slug', slug)
+      .single()
 
-  if (!product) return { title: 'Product Not Found' }
+    if (product) {
+      return {
+        title: product.seo_title || `${product.name} | Anisha Spices`,
+        description: product.seo_description || product.short_description || `Buy authentic ${product.name} from Anisha Spices.`,
+      }
+    }
+  } catch {
+    // Fallback
+  }
 
+  const formattedName = slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
   return {
-    title: product.seo_title || `${product.name} | Aura Masale`,
-    description: product.seo_description || product.short_description || `Buy authentic ${product.name} from Aura Masale.`,
+    title: `${formattedName} | Anisha Spices`,
+    description: `Buy authentic, 100% pure ${formattedName} from Anisha Spices.`,
   }
 }
 
@@ -110,85 +120,91 @@ export default async function ProductDetailsPage({
   })
 
   return (
-    <div className="bg-surface py-8">
+    <div className="bg-[#F8ECE7] min-h-screen py-8 sm:py-12 text-[#2A1612]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Breadcrumbs */}
-        <nav className="flex items-center text-sm font-medium text-text-muted mb-8">
-          <Link href="/" className="hover:text-primary transition-colors">Home</Link>
-          <ChevronRight className="w-4 h-4 mx-2" />
-          <Link href="/shop" className="hover:text-primary transition-colors">Shop</Link>
-          <ChevronRight className="w-4 h-4 mx-2" />
-          {product.categories && (
-            <>
-              <Link href={`/shop?category=${product.categories.slug}`} className="hover:text-primary transition-colors">
-                {product.categories.name}
-              </Link>
-              <ChevronRight className="w-4 h-4 mx-2" />
-            </>
-          )}
-          <span className="text-text">{product.name}</span>
-        </nav>
 
-        <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
-          
-          {/* Left Column: Image Gallery */}
-          <div className="mb-10 lg:mb-0">
-            <ProductImageGallery 
-              images={product.product_images || []} 
-              featuredImage={product.featured_image_url} 
-            />
-          </div>
+        {/* Product Hero Grid (Card Container) */}
+        <div className="bg-white rounded-3xl p-5 sm:p-8 lg:p-10 border border-[#E8DFD5] shadow-sm">
+          <div className="lg:grid lg:grid-cols-12 lg:gap-x-12 xl:gap-x-16 items-start">
 
-          {/* Right Column: Product Info & Actions */}
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-text mb-4">
-              {product.name}
-            </h1>
-            
-            {product.short_description && (
-              <p className="text-lg text-text-muted mb-6">
-                {product.short_description}
-              </p>
-            )}
+            {/* Left Column: Image Gallery (5 cols) */}
+            <div className="lg:col-span-5 mb-8 lg:mb-0">
+              <ProductImageGallery
+                images={product.product_images || []}
+                featuredImage={product.featured_image_url}
+              />
+            </div>
 
-            {/* Variants Selector (Handles Price & Add to Cart) */}
-            <ProductVariantSelector variants={product.product_variants || []} />
+            {/* Right Column: Product Info & Actions (7 cols) */}
+            <div className="lg:col-span-7 flex flex-col justify-between">
+              <div>
+                {/* Category Badge & Rating */}
+                <div className="flex flex-wrap items-center gap-3 mb-3">
+                  {product.categories && (
+                    <span className="px-3 py-1 rounded-full bg-[#FAF6F2] border border-[#E8DFD5] text-[11px] font-bold uppercase tracking-wider text-[#7B111A]">
+                      {product.categories.name}
+                    </span>
+                  )}
+                  <div className="flex items-center gap-1.5 text-xs text-amber-700 font-bold bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/60">
+                    <span>★</span>
+                    <span>{product.average_rating || '4.9'}</span>
+                    <span className="text-stone-400 font-normal">({product.review_count || '120+'} verified)</span>
+                  </div>
+                </div>
 
-            {/* FAQs Accordion removed from here */}
+                <h1 className="font-serif text-2xl xs:text-3xl sm:text-4xl lg:text-[2.6rem] font-bold text-[#2A1612] mb-3 leading-[1.18]">
+                  {product.name}
+                </h1>
+
+                {product.short_description && (
+                  <p className="text-sm sm:text-base text-[#5A433B] leading-relaxed mb-6 font-normal">
+                    {product.short_description}
+                  </p>
+                )}
+              </div>
+
+              {/* Variants Selector (Handles Price & Add to Cart) */}
+              <ProductVariantSelector variants={product.product_variants || []} />
+            </div>
           </div>
         </div>
 
         {/* Description & Additional Info Section */}
         {(product.description || sortedInfo.length > 0) && (
-          <div className="mt-20 border-t border-border pt-16">
-            <div className="lg:grid lg:grid-cols-2 lg:gap-x-16">
-              
+          <div className="mt-10 sm:mt-14 bg-white rounded-3xl p-6 sm:p-10 border border-[#E8DFD5] shadow-sm">
+            <div className="lg:grid lg:grid-cols-2 lg:gap-x-16 gap-y-10">
+
               {/* Description */}
-              <div className="mb-12 lg:mb-0">
-                <h3 className="text-2xl font-bold text-text mb-6">Description</h3>
+              <div className="mb-8 lg:mb-0">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-lg">🌿</span>
+                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#2A1612]">About This Spice</h3>
+                </div>
                 {product.description ? (
-                  <div className="prose prose-sm text-text-muted max-w-none whitespace-pre-wrap">
+                  <div className="prose prose-stone text-[#5A433B] max-w-none whitespace-pre-wrap leading-relaxed text-sm sm:text-base font-normal">
                     {product.description}
                   </div>
                 ) : (
-                  <p className="text-text-muted italic">No description available.</p>
+                  <p className="text-stone-400 italic text-sm">No description available.</p>
                 )}
               </div>
 
               {/* Additional Information Table */}
               <div>
-                <h3 className="text-2xl font-bold text-text mb-6">Additional Information</h3>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-lg">📋</span>
+                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#2A1612]">Spice Specifications</h3>
+                </div>
                 {sortedInfo.length > 0 ? (
-                  <div className="overflow-hidden bg-white border border-border rounded-xl">
-                    <table className="min-w-full divide-y divide-border">
-                      <tbody className="divide-y divide-border">
+                  <div className="overflow-hidden bg-[#FAF6F2] border border-[#E8DFD5] rounded-2xl">
+                    <table className="min-w-full divide-y divide-[#E8DFD5]">
+                      <tbody className="divide-y divide-[#E8DFD5]">
                         {sortedInfo.map((info: any, idx: number) => (
-                          <tr key={info.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                            <td className="py-4 pl-4 pr-3 text-sm font-medium text-text sm:pl-6 w-1/3 border-r border-border">
+                          <tr key={info.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#FAF6F2]'}>
+                            <td className="py-3.5 pl-4 sm:pl-6 pr-3 text-xs sm:text-sm font-bold text-[#2A1612] w-1/3 border-r border-[#E8DFD5]">
                               {info.label}
                             </td>
-                            <td className="px-4 py-4 text-sm text-text-muted sm:pr-6 whitespace-pre-wrap">
+                            <td className="px-4 py-3.5 text-xs sm:text-sm text-[#5A433B] sm:pr-6 whitespace-pre-wrap font-medium">
                               {info.value}
                             </td>
                           </tr>
@@ -197,45 +213,50 @@ export default async function ProductDetailsPage({
                     </table>
                   </div>
                 ) : (
-                  <p className="text-text-muted italic">No additional information available.</p>
-                )}
-              </div>
-
-            </div>
-          </div>
-        )}
-
-        {/* FAQs & Future Reviews Section */}
-        {(sortedFaqs.length > 0 || true) && (
-          <div className="mt-20 border-t border-border pt-16">
-            <div className="lg:grid lg:grid-cols-2 lg:gap-x-16">
-              
-              {/* FAQs */}
-              <div className="mb-12 lg:mb-0">
-                {sortedFaqs.length > 0 ? (
-                  <>
-                    <h3 className="text-2xl font-bold text-text mb-6">Frequently Asked Questions</h3>
-                    <ProductAccordion faqs={sortedFaqs} />
-                  </>
-                ) : (
-                  <div className="h-full flex items-center justify-center text-text-muted">
-                    {/* No FAQs */}
+                  <div className="p-6 text-center text-stone-400 bg-[#FAF6F2] rounded-2xl border border-[#E8DFD5] text-xs">
+                    100% Pure, Naturally Sourced Indian Spice.
                   </div>
                 )}
               </div>
 
-              {/* Reviews Section */}
-              <div>
-                <ProductReviews 
-                  productId={product.id} 
-                  isAuthenticated={isAuthenticated} 
-                  reviews={reviews as any} 
-                />
-              </div>
-
             </div>
           </div>
         )}
+
+        {/* FAQs & Reviews Section */}
+        <div className="mt-10 sm:mt-14 bg-white rounded-3xl p-6 sm:p-10 border border-[#E8DFD5] shadow-sm">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-x-16 gap-y-10">
+
+            {/* FAQs */}
+            <div className="mb-8 lg:mb-0">
+              <div className="flex items-center gap-2 mb-6">
+                <span className="text-lg">💬</span>
+                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#2A1612]">Questions & Answers</h3>
+              </div>
+              {sortedFaqs.length > 0 ? (
+                <ProductAccordion faqs={sortedFaqs} />
+              ) : (
+                <div className="p-6 bg-[#FAF6F2] rounded-2xl border border-[#E8DFD5] text-center text-xs text-[#8C7567]">
+                  Have questions about this spice? Reach out to our spice masters via WhatsApp or Contact page.
+                </div>
+              )}
+            </div>
+
+            {/* Reviews Section */}
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <span className="text-lg">⭐️</span>
+                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#2A1612]">Customer Reviews</h3>
+              </div>
+              <ProductReviews
+                productId={product.id}
+                isAuthenticated={isAuthenticated}
+                reviews={reviews as any}
+              />
+            </div>
+
+          </div>
+        </div>
 
         {/* You May Also Like */}
         {relatedProducts.length > 0 && (

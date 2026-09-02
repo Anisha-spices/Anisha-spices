@@ -26,16 +26,18 @@ export function ProductImageGallery({ images, featuredImage }: ProductImageGalle
   }
 
   return (
-    <div className="flex flex-col-reverse lg:flex-row gap-4">
+    <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4">
       {/* Thumbnails */}
       {allImages.length > 1 && (
-        <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto lg:w-24 flex-shrink-0 hide-scrollbar pb-2 lg:pb-0">
+        <div className="flex sm:flex-col gap-2.5 overflow-x-auto sm:overflow-y-auto sm:w-20 flex-shrink-0 hide-scrollbar pb-1 sm:pb-0">
           {allImages.map((img, idx) => (
             <button
               key={idx}
               onClick={() => setActiveImage(img)}
-              className={`relative aspect-square w-20 lg:w-full flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
-                activeImage === img ? 'border-primary shadow-sm' : 'border-transparent hover:border-primary/50 opacity-70 hover:opacity-100'
+              className={`relative aspect-square w-16 sm:w-full flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
+                activeImage === img
+                  ? 'border-[#7B111A] ring-2 ring-[#C89B65]/40 shadow-md scale-95'
+                  : 'border-[#E8DFD5] hover:border-[#C89B65] opacity-75 hover:opacity-100 bg-white'
               }`}
             >
               <Image
@@ -43,25 +45,33 @@ export function ProductImageGallery({ images, featuredImage }: ProductImageGalle
                 alt={`Thumbnail ${idx + 1}`}
                 fill
                 className="object-cover"
-                sizes="100px"
+                sizes="80px"
               />
             </button>
           ))}
         </div>
       )}
 
-      {/* Main Image */}
-      <div className="relative flex-1 aspect-square rounded-2xl overflow-hidden bg-gray-100 border border-border">
+      {/* Main Image Stage */}
+      <div className="relative flex-1 aspect-square rounded-3xl overflow-hidden bg-gradient-to-b from-[#FAF6F2] to-[#F2E8DC] border border-[#E8DFD5] shadow-lg group">
         {activeImage && (
           <Image
             src={activeImage}
             alt="Product Image"
             fill
             priority
-            className="object-cover"
+            className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
             sizes="(max-width: 1024px) 100vw, 50vw"
           />
         )}
+        
+        {/* Subtle Luxury Corner Badges */}
+        <div className="absolute top-4 left-4 pointer-events-none">
+          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/85 backdrop-blur-md text-[11px] font-bold text-[#7B111A] border border-[#E8DFD5] shadow-xs uppercase tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#C89B65]" />
+            100% Pure
+          </span>
+        </div>
       </div>
     </div>
   )

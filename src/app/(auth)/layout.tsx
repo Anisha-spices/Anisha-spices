@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Account',
+  title: 'Sign In | Anisha Spices',
+  description: 'Sign in or create an account with Anisha Spices.',
 }
 
 export default function AuthLayout({
@@ -10,13 +12,22 @@ export default function AuthLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-orange-50 via-orange-50 to-yellow-50">
-      {/* Decorative elements */}
-      <div className="absolute top-0 left-0 w-72 h-72 bg-orange-200/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-200/30 rounded-full blur-3xl translate-x-1/3 translate-y-1/3" />
-      <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-yellow-200/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#F8ECE7] py-12 px-4 sm:px-6">
+      {/* Decorative ambient background glows */}
+      <div className="absolute top-0 left-0 w-80 h-80 bg-[#6B1118]/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#D49B4B]/10 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-md px-4 py-8">
+      {/* Back to Home Button */}
+      <div className="absolute top-6 left-6 z-20">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#6B1118] hover:text-[#520C12] transition-colors"
+        >
+          ← Back to Store
+        </Link>
+      </div>
+
+      <div className="relative z-10 w-full max-w-md">
         {children}
       </div>
     </div>
