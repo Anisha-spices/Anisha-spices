@@ -9,7 +9,7 @@ const defaultSpiceRange = [
     name: 'Turmeric Powder',
     image: SPICE_ASSETS.turmeric,
     tag: null,
-    href: '/shop?category=turmeric',
+    href: '/product/turmeric-powder',
     priceText: 'From ₹120',
   },
   {
@@ -17,7 +17,7 @@ const defaultSpiceRange = [
     name: 'Red Chilly Powder',
     image: SPICE_ASSETS.redChilly,
     tag: 'Best Seller',
-    href: '/shop?category=chilli',
+    href: '/product/red-chilly-powder',
     priceText: 'From ₹145',
   },
   {
@@ -25,7 +25,7 @@ const defaultSpiceRange = [
     name: 'Coriander Powder',
     image: SPICE_ASSETS.coriander,
     tag: null,
-    href: '/shop?category=coriander',
+    href: '/product/coriander-powder',
     priceText: 'From ₹110',
   },
   {
@@ -33,15 +33,15 @@ const defaultSpiceRange = [
     name: 'Cumin Powder',
     image: SPICE_ASSETS.cumin,
     tag: null,
-    href: '/shop?category=cumin',
+    href: '/product/cumin-powder',
     priceText: 'From ₹160',
   },
   {
     id: 'garam-masala',
     name: 'Garam Masala',
     image: SPICE_ASSETS.garamMasala,
-    tag: null,
-    href: '/shop?category=garam-masala',
+    tag: 'Authentic Blend',
+    href: '/product/garam-masala',
     priceText: 'From ₹180',
   },
 ]

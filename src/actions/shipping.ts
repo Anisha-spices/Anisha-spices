@@ -100,6 +100,7 @@ export async function updateShippingConfig(
     // Revalidate paths that use shipping calculations
     revalidatePath('/cart')
     revalidatePath('/checkout')
+    revalidatePath('/admin/delivery-settings')
     revalidatePath('/admin/settings/shipping')
     revalidatePath('/', 'layout')
 

@@ -13,19 +13,15 @@ export const metadata = {
     'Anisha Spices brings the richness of India\'s finest spices to your kitchen. Pure, natural & full of flavor.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   let liveProducts: LiveSpiceItem[] = []
 
   try {
     const supabase = await createClient()
-    const coreFiveSlugs = [
-      'turmeric-powder',
-      'red-chilly-powder',
-      'coriander-powder',
-      'cumin-powder',
-      'garam-masala',
-    ]
 
+    // Dynamically fetch featured spices first, then active products (controlled by Admin Panel)
     const { data: dbProducts } = await supabase
       .from('products')
       .select(`
@@ -36,9 +32,10 @@ export default async function HomePage() {
         is_featured,
         product_variants (price, is_active)
       `)
-      .in('slug', coreFiveSlugs)
       .eq('is_active', true)
-      .limit(5)
+      .order('is_featured', { ascending: false })
+      .order('created_at', { ascending: true })
+      .limit(10)
 
     if (dbProducts && dbProducts.length > 0) {
       liveProducts = dbProducts.map((p: any) => {

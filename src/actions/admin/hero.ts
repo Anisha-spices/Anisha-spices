@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 
@@ -37,8 +38,8 @@ export async function updateGlobalHeroText(data: {
   const isAdmin = await checkAdminAuth(supabase)
   if (!isAdmin) return { success: false, error: 'Unauthorized' }
 
-  // Update all slides with the new global text
-  const { error } = await supabase
+  const adminClient = createAdminClient()
+  const { error } = await adminClient
     .from('hero_slides')
     .update({
       title: data.title,
@@ -47,7 +48,7 @@ export async function updateGlobalHeroText(data: {
       button_link: data.button_link,
       updated_at: new Date().toISOString()
     })
-    .neq('id', '00000000-0000-0000-0000-000000000000') // Trick to update all rows
+    .neq('id', '00000000-0000-0000-0000-000000000000')
 
   if (error) return { success: false, error: error.message }
 
@@ -61,8 +62,8 @@ export async function updateHeroTextMode(mode: 'global' | 'per_slide') {
   const isAdmin = await checkAdminAuth(supabase)
   if (!isAdmin) return { success: false, error: 'Unauthorized' }
 
-  // Update text_mode across all slides
-  const { error } = await supabase
+  const adminClient = createAdminClient()
+  const { error } = await adminClient
     .from('hero_slides')
     .update({
       text_mode: mode,
@@ -87,7 +88,8 @@ export async function updateHeroSlideText(id: string, data: {
   const isAdmin = await checkAdminAuth(supabase)
   if (!isAdmin) return { success: false, error: 'Unauthorized' }
 
-  const { error } = await supabase
+  const adminClient = createAdminClient()
+  const { error } = await adminClient
     .from('hero_slides')
     .update({
       title: data.title,
@@ -106,9 +108,9 @@ export async function updateHeroSlideText(id: string, data: {
 }
 
 export async function getHeroSlides() {
-  const supabase = await createClient()
+  const adminClient = createAdminClient()
   
-  const { data } = await supabase
+  const { data } = await adminClient
     .from('hero_slides')
     .select('*')
     .order('display_order', { ascending: true })
@@ -122,8 +124,8 @@ export async function createHeroSlide(imageUrl: string, globalText?: any) {
   const isAdmin = await checkAdminAuth(supabase)
   if (!isAdmin) return { success: false, error: 'Unauthorized' }
 
-  // Check limit
-  const { count } = await supabase
+  const adminClient = createAdminClient()
+  const { count } = await adminClient
     .from('hero_slides')
     .select('*', { count: 'exact', head: true })
 
@@ -131,7 +133,7 @@ export async function createHeroSlide(imageUrl: string, globalText?: any) {
     return { success: false, error: 'Maximum 5 slides allowed.' }
   }
 
-  const { error } = await supabase
+  const { error } = await adminClient
     .from('hero_slides')
     .insert([{
       image_url: imageUrl,
@@ -156,7 +158,8 @@ export async function deleteHeroSlide(id: string) {
   const isAdmin = await checkAdminAuth(supabase)
   if (!isAdmin) return { success: false, error: 'Unauthorized' }
 
-  const { error } = await supabase
+  const adminClient = createAdminClient()
+  const { error } = await adminClient
     .from('hero_slides')
     .delete()
     .eq('id', id)
@@ -173,7 +176,8 @@ export async function toggleHeroSlideStatus(id: string, isActive: boolean) {
   const isAdmin = await checkAdminAuth(supabase)
   if (!isAdmin) return { success: false, error: 'Unauthorized' }
 
-  const { error } = await supabase
+  const adminClient = createAdminClient()
+  const { error } = await adminClient
     .from('hero_slides')
     .update({ is_active: isActive })
     .eq('id', id)

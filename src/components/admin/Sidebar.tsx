@@ -13,7 +13,7 @@ import {
   Image as ImageIcon,
   Megaphone,
   Truck,
-  Settings,
+  HelpCircle,
   ChevronLeft,
   ChevronRight,
   Star,
@@ -31,8 +31,8 @@ const navItems = [
   { label: 'Inquiries', href: '/admin/inquiries', icon: MessageSquare },
   { label: 'Hero Slides', href: '/admin/hero-slides', icon: ImageIcon },
   { label: 'Announcements', href: '/admin/announcements', icon: Megaphone },
-  { label: 'Delivery Settings', href: '/admin/settings/shipping', icon: Truck },
-  { label: 'Global FAQs', href: '/admin/settings/faqs', icon: Settings },
+  { label: 'Delivery Settings', href: '/admin/delivery-settings', icon: Truck },
+  { label: 'Global FAQs', href: '/admin/global-faqs', icon: HelpCircle },
 ]
 
 export default function AdminSidebar() {

@@ -63,14 +63,20 @@ export function Footer() {
             {/* Quick Links */}
             <div className="space-y-3">
               <h3 className="font-serif text-sm sm:text-base font-bold text-[#E5AD58] tracking-wider uppercase">
-                Quick Links
+                Explore
               </h3>
               <ul className="space-y-2 text-xs sm:text-sm">
                 <li>
                   <Link href="/" className="text-stone-300 hover:text-white transition-colors">Home</Link>
                 </li>
                 <li>
-                  <Link href="/shop" className="text-stone-300 hover:text-white transition-colors">Shop All</Link>
+                  <Link href="/shop" className="text-stone-300 hover:text-white transition-colors">Shop All Spices</Link>
+                </li>
+                <li>
+                  <Link href="/shop?category=ground-spices" className="text-stone-300 hover:text-white transition-colors">Ground Spices</Link>
+                </li>
+                <li>
+                  <Link href="/shop?category=blended-spices" className="text-stone-300 hover:text-white transition-colors">Blended Spices</Link>
                 </li>
                 <li>
                   <Link href="/about" className="text-stone-300 hover:text-white transition-colors">About Us</Link>
@@ -81,26 +87,26 @@ export function Footer() {
               </ul>
             </div>
 
-            {/* Spice Categories */}
+            {/* Spice Direct Products */}
             <div className="space-y-3">
               <h3 className="font-serif text-sm sm:text-base font-bold text-[#E5AD58] tracking-wider uppercase">
-                Our Spices
+                Signature Spices
               </h3>
               <ul className="space-y-2 text-xs sm:text-sm">
                 <li>
-                  <Link href="/shop?category=turmeric" className="text-stone-300 hover:text-white transition-colors">Turmeric</Link>
+                  <Link href="/product/turmeric-powder" className="text-stone-300 hover:text-white transition-colors">Salem Turmeric</Link>
                 </li>
                 <li>
-                  <Link href="/shop?category=chilli" className="text-stone-300 hover:text-white transition-colors">Red Chilly</Link>
+                  <Link href="/product/red-chilly-powder" className="text-stone-300 hover:text-white transition-colors">Guntur Red Chilly</Link>
                 </li>
                 <li>
-                  <Link href="/shop?category=coriander" className="text-stone-300 hover:text-white transition-colors">Coriander</Link>
+                  <Link href="/product/coriander-powder" className="text-stone-300 hover:text-white transition-colors">Coriander Powder</Link>
                 </li>
                 <li>
-                  <Link href="/shop?category=cumin" className="text-stone-300 hover:text-white transition-colors">Cumin</Link>
+                  <Link href="/product/cumin-powder" className="text-stone-300 hover:text-white transition-colors">Gujarat Cumin</Link>
                 </li>
                 <li>
-                  <Link href="/shop?category=garam-masala" className="text-stone-300 hover:text-white transition-colors">Garam Masala</Link>
+                  <Link href="/product/garam-masala" className="text-stone-300 hover:text-white transition-colors">Royal Garam Masala</Link>
                 </li>
               </ul>
             </div>
@@ -144,13 +150,32 @@ export function Footer() {
 
         </div>
 
-        {/* Bottom copyright */}
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-400 text-center sm:text-left">
-          <p>&copy; {new Date().getFullYear()} Anisha Spices. All rights reserved.</p>
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-            <Link href="/about" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="/about" className="hover:text-white transition-colors">Terms of Service</Link>
-            <Link href="/contact" className="hover:text-white transition-colors">Support</Link>
+        {/* Bottom copyright & legal strip */}
+        <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-300 text-center sm:text-left">
+          <p className="tracking-wide">
+            &copy; {new Date().getFullYear()} <strong className="text-white font-semibold">Anisha Spices</strong>. All rights reserved.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-xs font-medium">
+            <Link 
+              href="/privacy" 
+              className="text-stone-300 hover:text-[#E5AD58] transition-colors py-1 hover:underline underline-offset-4"
+            >
+              Privacy Policy
+            </Link>
+            <span className="text-white/20">•</span>
+            <Link 
+              href="/terms" 
+              className="text-stone-300 hover:text-[#E5AD58] transition-colors py-1 hover:underline underline-offset-4"
+            >
+              Terms of Service
+            </Link>
+            <span className="text-white/20">•</span>
+            <Link 
+              href="/contact" 
+              className="text-stone-300 hover:text-[#E5AD58] transition-colors py-1 hover:underline underline-offset-4"
+            >
+              Customer Support
+            </Link>
           </div>
         </div>
 

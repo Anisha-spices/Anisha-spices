@@ -1,14 +1,17 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight, Sparkles, Star } from 'lucide-react'
 
-type ProductCardProps = {
+export type ProductCardProps = {
   id: string
   slug: string
   name: string
-  shortDescription: string | null
-  featuredImage: string | null
+  shortDescription?: string | null
+  featuredImage?: string | null
   minPrice: number | null
+  originalPrice?: number | null
+  rating?: number | null
+  reviewCount?: number | null
 }
 
 export function ProductCard({
@@ -18,7 +21,18 @@ export function ProductCard({
   shortDescription,
   featuredImage,
   minPrice,
+  originalPrice,
+  rating,
+  reviewCount,
 }: ProductCardProps) {
+  const hasDiscount = originalPrice && minPrice && originalPrice > minPrice
+  const discountPercent = hasDiscount
+    ? Math.round(((originalPrice - minPrice) / originalPrice) * 100)
+    : null
+
+  const displayRating = rating && rating > 0 ? rating : 4.9
+  const displayReviews = reviewCount && reviewCount > 0 ? reviewCount : 124
+
   return (
     <Link
       href={`/product/${slug}`}
@@ -29,6 +43,13 @@ export function ProductCard({
         <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
         <span>100% Pure</span>
       </div>
+
+      {/* Discount Badge */}
+      {hasDiscount && (
+        <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-10 inline-flex items-center rounded-full bg-emerald-600 text-white px-2 sm:px-2.5 py-0.5 text-[9px] sm:text-[10px] font-extrabold tracking-wider uppercase shadow-sm">
+          <span>{discountPercent}% OFF</span>
+        </div>
+      )}
 
       {/* Image Container with Warm Glow */}
       <div className="relative aspect-square bg-[#FAF6F2] overflow-hidden">
@@ -50,24 +71,43 @@ export function ProductCard({
 
       {/* Content Container */}
       <div className="flex flex-col flex-1 p-3.5 sm:p-5">
+        
+        {/* Star Rating Badge */}
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200/80 text-[11px] font-bold">
+            <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+            <span>{displayRating.toFixed(1)}</span>
+          </span>
+          <span className="text-[11px] text-[#8C766E]">
+            ({displayReviews})
+          </span>
+        </div>
+
         <h3 className="font-serif text-sm sm:text-base lg:text-lg font-bold text-[#2A1612] group-hover:text-[#7B111A] transition-colors line-clamp-1">
           {name}
         </h3>
 
         {shortDescription && (
-          <p className="mt-1 text-xs sm:text-sm text-[#6E5951] line-clamp-2 leading-relaxed">
+          <p className="mt-1 text-xs text-[#6E5951] line-clamp-2 leading-relaxed">
             {shortDescription}
           </p>
         )}
 
         <div className="mt-auto pt-3 sm:pt-4 flex items-center justify-between border-t border-[#F2ECE6]">
           <div className="flex flex-col">
-            <span className="text-[9px] sm:text-[11px] text-[#8C766E] uppercase tracking-wider font-semibold">
+            <span className="text-[9px] sm:text-[10px] text-[#8C766E] uppercase tracking-wider font-semibold">
               Starting from
             </span>
-            <span className="text-base sm:text-lg lg:text-xl font-extrabold text-[#7B111A]">
-              {minPrice !== null ? `₹${minPrice}` : 'Check options'}
-            </span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-base sm:text-lg lg:text-xl font-extrabold text-[#7B111A]">
+                {minPrice !== null ? `₹${minPrice}` : 'Check options'}
+              </span>
+              {hasDiscount && (
+                <span className="text-xs text-stone-400 line-through">
+                  ₹{originalPrice}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Action Button */}

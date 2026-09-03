@@ -52,6 +52,7 @@ export async function addGlobalFaq(formData: FormData) {
     return { success: false, error: error.message }
   }
 
+  revalidatePath('/admin/global-faqs')
   revalidatePath('/admin/settings/faqs')
   revalidatePath('/product/[slug]', 'page')
   return { success: true, data: data[0] }
@@ -77,6 +78,7 @@ export async function updateGlobalFaq(id: string, formData: FormData) {
     return { success: false, error: error.message }
   }
 
+  revalidatePath('/admin/global-faqs')
   revalidatePath('/admin/settings/faqs')
   revalidatePath('/product/[slug]', 'page')
   return { success: true, data: data[0] }
@@ -94,6 +96,7 @@ export async function deleteGlobalFaq(id: string) {
     return { success: false, error: error.message }
   }
 
+  revalidatePath('/admin/global-faqs')
   revalidatePath('/admin/settings/faqs')
   revalidatePath('/product/[slug]', 'page')
   return { success: true }
@@ -115,6 +118,7 @@ export async function updateGlobalFaqOrders(orders: { id: string; display_order:
     }
   }
 
+  revalidatePath('/admin/global-faqs')
   revalidatePath('/admin/settings/faqs')
   revalidatePath('/product/[slug]', 'page')
   return { success: true }
