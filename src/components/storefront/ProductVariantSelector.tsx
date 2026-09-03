@@ -137,7 +137,7 @@ export function ProductVariantSelector({ variants }: { variants: Variant[] }) {
 
   return (
     <div className="mt-2.5 sm:mt-6">
-      {/* Price & Savings Display (Zepto-style compact on mobile) */}
+      {/* Price & Savings Display (Compact on mobile) */}
       <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5 sm:mb-5 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[#FAF6F2] border border-[#E8DFD5]">
         <div className="flex items-baseline gap-2">
           <span className="text-2xl xs:text-3xl sm:text-4xl font-black text-[#7B111A]">₹{selectedVariant?.price}</span>
@@ -154,7 +154,7 @@ export function ProductVariantSelector({ variants }: { variants: Variant[] }) {
         <span className="text-[11px] sm:text-xs text-stone-500 w-full sm:w-auto font-medium">Inclusive of all taxes</span>
       </div>
 
-      {/* Variant Selection (Packet Sizes - Zepto Style Compact Pills) */}
+      {/* Variant Selection (Packet Sizes - Compact Quick Pills) */}
       {activeVariants.length > 1 && (
         <div className="mb-2.5 sm:mb-5">
           <div className="flex items-center justify-between mb-1.5 sm:mb-2.5">
