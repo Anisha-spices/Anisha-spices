@@ -30,7 +30,7 @@ Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 ## 🔑 Environment Variables (`.env.local`)
 
 ```env
-# Supabase
+# Supabase (
 NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
 SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
@@ -39,7 +39,7 @@ SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
 ADMIN_EMAIL="admin@auramasale.com"
 ADMIN_PASSWORD="your-admin-password"
 
-# Razorpay (Optional for Online Payments)
+# Razorpay (Optional for Online Payments) (currently not using [as of september 1st week])
 RAZORPAY_KEY_ID="rzp_test_..."
 RAZORPAY_KEY_SECRET="your-razorpay-secret"
 
