@@ -1,22 +1,10 @@
-﻿'use client'
-
-import { Phone } from 'lucide-react'
+'use client'
 
 export function FloatingContact() {
-  const phoneNumber = '+919540048786'
   const waNumber = '919540048786'
 
   return (
     <div className="fixed bottom-20 lg:bottom-6 right-4 lg:right-6 z-40 flex flex-col gap-3">
-      {/* Phone Icon - Only visible on small screens (mobile) */}
-      <a
-        href={`tel:${phoneNumber}`}
-        className="flex lg:hidden items-center justify-center w-12 h-12 bg-orange-500 text-white rounded-full shadow-lg shadow-orange-500/30 hover:bg-orange-600 hover:scale-110 transition-all duration-300 animate-fade-in"
-        aria-label="Call Us"
-      >
-        <Phone className="w-5 h-5 fill-current" />
-      </a>
-
       {/* WhatsApp Icon - Visible everywhere */}
       <a
         href={`https://wa.me/${waNumber}`}
