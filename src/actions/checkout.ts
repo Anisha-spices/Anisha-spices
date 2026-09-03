@@ -91,6 +91,10 @@ export async function createOrder(
         return { success: false, error: 'Please fill in all required shipping fields.' }
       }
 
+      if (!/^\d{6}$/.test(addressInput.postal_code.trim())) {
+        return { success: false, error: 'Please enter a valid 6-digit Indian PIN code.' }
+      }
+
       shippingAddressSnapshot = {
         full_name: addressInput.full_name.trim(),
         phone: addressInput.phone.trim(),

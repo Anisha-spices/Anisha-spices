@@ -1,4 +1,4 @@
-// Database type definitions for Aura Masale
+// Database type definitions for Anisha Masale
 // These types mirror the Supabase database schema
 
 export type UserRole = 'customer' | 'admin'

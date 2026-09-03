@@ -2,7 +2,7 @@ import { getGlobalFaqs } from '@/actions/global_faqs'
 import { GlobalFaqsEditor } from '@/components/admin/GlobalFaqsEditor'
 
 export const metadata = {
-  title: 'Global FAQs | Aura Masale Admin',
+  title: 'Global FAQs | Anisha Masale Admin',
 }
 
 export default async function GlobalFaqsPage() {

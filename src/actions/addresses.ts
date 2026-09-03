@@ -22,6 +22,10 @@ export async function addAddress(formData: FormData) {
     return { success: false, error: 'All required fields must be filled.' }
   }
 
+  if (!/^\d{6}$/.test(postalCode.trim())) {
+    return { success: false, error: 'Please enter a valid 6-digit Indian PIN code.' }
+  }
+
   // If this address is set as default, we need to unset any other default first
   if (isDefault) {
     await supabase.from('addresses').update({ is_default: false }).eq('user_id', user.id)
@@ -86,6 +90,10 @@ export async function updateAddress(id: string, formData: FormData) {
 
   if (!fullName || !phone || !addressLine1 || !city || !state || !postalCode) {
     return { success: false, error: 'All required fields must be filled.' }
+  }
+
+  if (!/^\d{6}$/.test(postalCode.trim())) {
+    return { success: false, error: 'Please enter a valid 6-digit Indian PIN code.' }
   }
 
   if (isDefault) {

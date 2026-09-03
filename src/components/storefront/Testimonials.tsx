@@ -15,14 +15,14 @@ const REVIEWS = [
     id: 2,
     name: 'Rahul Verma',
     role: 'Food Enthusiast',
-    text: 'Aura Masale has completely changed my biryani game. The whole spices are incredibly aromatic. You can immediately tell these are sourced fresh directly from farms.',
+    text: 'Anisha Masale has completely changed my biryani game. The whole spices are incredibly aromatic. You can immediately tell these are sourced fresh directly from farms.',
     rating: 5,
   },
   {
     id: 3,
     name: 'Priya Iyer',
     role: 'Regular Customer',
-    text: 'I have tried many premium spice brands, but nothing comes close to the pure, unadulterated flavor of Aura. Their garam masala is my absolute favorite.',
+    text: 'I have tried many premium spice brands, but nothing comes close to the pure, unadulterated flavor of Anisha Masale. Their garam masala is my absolute favorite.',
     rating: 5,
   },
   {
@@ -36,7 +36,7 @@ const REVIEWS = [
     id: 5,
     name: 'Neha Gupta',
     role: 'Nutritionist',
-    text: 'Finding pure, pesticide-free spices is tough. I love that Aura Masale focuses on ethical sourcing and purity. The natural oils in their spices are intact.',
+    text: 'Finding pure, pesticide-free spices is tough. I love that Anisha Masale focuses on ethical sourcing and purity. The natural oils in their spices are intact.',
     rating: 5,
   },
   {

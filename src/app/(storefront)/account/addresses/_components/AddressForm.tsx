@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useTransition } from 'react'
-import { X, Save, MapPin, Check, ChevronDown } from 'lucide-react'
+import { X, Save, MapPin, Check, ChevronDown, Loader2 } from 'lucide-react'
 import { addAddress, updateAddress } from '@/actions/addresses'
 
 type Address = {
@@ -34,9 +34,84 @@ export function AddressForm({
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
+  // Controlled form values for auto-fill
+  const [city, setCity] = useState(address?.city || '')
+  const [selectedState, setSelectedState] = useState(address?.state || 'Uttar Pradesh')
+  const [postalCode, setPostalCode] = useState(address?.postal_code || '')
+  const [availableLocalities, setAvailableLocalities] = useState<string[]>(
+    address?.city ? [address.city] : []
+  )
+  const [isVerifyingPincode, setIsVerifyingPincode] = useState(false)
+  const [pincodeStatus, setPincodeStatus] = useState<{
+    status: 'idle' | 'valid' | 'invalid'
+    location?: string
+    message?: string
+  }>({ status: address?.postal_code ? 'valid' : 'idle' })
+
+  const checkAndAutoFillPincode = async (pin: string) => {
+    if (!/^\d{6}$/.test(pin)) {
+      setPincodeStatus({ status: 'idle' })
+      setAvailableLocalities([])
+      return
+    }
+
+    setIsVerifyingPincode(true)
+    try {
+      const res = await fetch(`/api/pincode?code=${pin}`)
+      const data = await res.json()
+
+      if (!data.valid) {
+        setAvailableLocalities([])
+        setPincodeStatus({
+          status: 'invalid',
+          message: data.message || 'Invalid Indian Postal PIN code. Please enter a valid PIN code.',
+        })
+        return
+      }
+
+      // Match state with INDIAN_STATES
+      let matchedState = 'Uttar Pradesh'
+      if (data.state) {
+        const found = INDIAN_STATES.find(
+          (st) =>
+            st.toLowerCase() === data.state.toLowerCase() ||
+            st.toLowerCase().includes(data.state.toLowerCase()) ||
+            data.state.toLowerCase().includes(st.toLowerCase())
+        )
+        if (found) matchedState = found
+      }
+
+      const detectedCity = data.city || data.district || ''
+      const locationLabel = detectedCity ? `${detectedCity}, ${data.state}` : data.state || 'Verified'
+      const localities = Array.isArray(data.postOffices) && data.postOffices.length > 0
+        ? data.postOffices
+        : [detectedCity].filter(Boolean)
+
+      setAvailableLocalities(localities)
+      setPincodeStatus({
+        status: 'valid',
+        location: locationLabel,
+      })
+
+      setCity(localities[0] || detectedCity)
+      setSelectedState(matchedState)
+    } catch {
+      setPincodeStatus({ status: 'idle' })
+      setAvailableLocalities([])
+    } finally {
+      setIsVerifyingPincode(false)
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
+
+    if (pincodeStatus.status === 'invalid') {
+      setError('Please enter a valid Indian Postal PIN code before saving.')
+      return
+    }
+
     const formData = new FormData(e.currentTarget)
 
     startTransition(async () => {
@@ -165,20 +240,113 @@ export function AddressForm({
               />
             </div>
 
-            {/* City */}
+            {/* PIN Code (First, to drive Area & State selection) */}
+            <div className="sm:col-span-2">
+              <div className="flex items-center justify-between mb-1.5">
+                <label htmlFor="postal_code" className="block text-xs font-semibold text-stone-700 uppercase tracking-wider">
+                  6-Digit PIN Code <span className="text-red-500">*</span>
+                </label>
+                {isVerifyingPincode && (
+                  <span className="text-[11px] text-[#6B1118] flex items-center gap-1 font-medium">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Fetching Official Postal Localities...
+                  </span>
+                )}
+              </div>
+              <div className="relative sm:w-1/2">
+                <input
+                  type="text"
+                  id="postal_code"
+                  name="postal_code"
+                  value={postalCode}
+                  onChange={(e) => {
+                    const cleanPin = e.target.value.replace(/\D/g, '').slice(0, 6)
+                    setPostalCode(cleanPin)
+                    if (cleanPin.length === 6) {
+                      checkAndAutoFillPincode(cleanPin)
+                    } else {
+                      setPincodeStatus({ status: 'idle' })
+                      setAvailableLocalities([])
+                    }
+                  }}
+                  required
+                  maxLength={6}
+                  placeholder="221001"
+                  className={`w-full px-4 py-2.5 rounded-xl border bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 transition-all tracking-widest font-mono ${
+                    pincodeStatus.status === 'valid'
+                      ? 'border-emerald-400 focus:ring-emerald-500/20 focus:border-emerald-500'
+                      : pincodeStatus.status === 'invalid'
+                      ? 'border-red-400 focus:ring-red-500/20 focus:border-red-500'
+                      : 'border-stone-200 focus:ring-[#6B1118]/20 focus:border-[#6B1118]'
+                  }`}
+                />
+              </div>
+
+              {pincodeStatus.status === 'valid' && pincodeStatus.location && (
+                <p className="mt-1.5 text-xs font-medium text-emerald-700 flex items-center gap-1 animate-in fade-in duration-200">
+                  <span>✅</span>
+                  <span>Verified Postal Area: <strong>{pincodeStatus.location}</strong></span>
+                </p>
+              )}
+
+              {pincodeStatus.status === 'invalid' && (
+                <p className="mt-1.5 text-xs font-medium text-red-600 flex items-center gap-1 animate-in fade-in duration-200">
+                  <span>⚠️</span>
+                  <span>{pincodeStatus.message || 'Invalid Indian Postal PIN code. Please enter a valid PIN code.'}</span>
+                </p>
+              )}
+            </div>
+
+            {/* City / Area Dropdown (Amazon Model) */}
             <div>
-              <label htmlFor="city" className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5">
-                City / Town <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="city"
-                name="city"
-                defaultValue={address?.city}
-                required
-                placeholder="e.g. Varanasi"
-                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1118]/20 focus:border-[#6B1118] focus:bg-white transition-all"
-              />
+              <div className="flex items-center justify-between mb-1.5">
+                <label htmlFor="city" className="block text-xs font-semibold text-stone-700 uppercase tracking-wider">
+                  City / Area / Town <span className="text-red-500">*</span>
+                </label>
+                {availableLocalities.length > 0 && (
+                  <span className="text-[10px] text-emerald-700 font-semibold uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    {availableLocalities.length} Verified Areas
+                  </span>
+                )}
+              </div>
+
+              {availableLocalities.length > 0 ? (
+                <div className="relative">
+                  <select
+                    id="city"
+                    name="city"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    required
+                    className="w-full appearance-none px-4 py-2.5 rounded-xl border border-emerald-300 bg-emerald-50/20 text-stone-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all pr-10 cursor-pointer shadow-xs"
+                  >
+                    {availableLocalities.map((loc) => (
+                      <option key={loc} value={loc}>
+                        {loc}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-emerald-600 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  id="city"
+                  name="city"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                  placeholder={
+                    isVerifyingPincode
+                      ? 'Fetching official areas...'
+                      : postalCode.length === 6
+                      ? 'Enter valid PIN above to select area'
+                      : 'Enter 6-digit PIN code above first'
+                  }
+                  disabled={postalCode.length < 6}
+                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1118]/20 focus:border-[#6B1118] focus:bg-white transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                />
+              )}
             </div>
 
             {/* State */}
@@ -190,7 +358,8 @@ export function AddressForm({
                 <select
                   id="state"
                   name="state"
-                  defaultValue={address?.state || 'Uttar Pradesh'}
+                  value={selectedState}
+                  onChange={(e) => setSelectedState(e.target.value)}
                   required
                   className="w-full appearance-none px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1118]/20 focus:border-[#6B1118] focus:bg-white transition-all pr-10 cursor-pointer"
                 >
@@ -202,24 +371,6 @@ export function AddressForm({
                 </select>
                 <ChevronDown className="w-4 h-4 text-stone-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
-            </div>
-
-            {/* PIN Code */}
-            <div className="sm:col-span-2">
-              <label htmlFor="postal_code" className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5">
-                6-Digit PIN Code <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="postal_code"
-                name="postal_code"
-                defaultValue={address?.postal_code}
-                required
-                maxLength={6}
-                pattern="[0-9]{6}"
-                placeholder="221001"
-                className="w-full sm:w-1/2 px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1118]/20 focus:border-[#6B1118] focus:bg-white transition-all tracking-widest font-mono"
-              />
             </div>
 
             {/* Is Default Checkbox */}

@@ -28,7 +28,7 @@ export default function AdminLoginPage() {
             </div>
             <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
             <p className="text-stone-400 mt-1 text-sm">
-              Aura Masale — Management Portal
+              Anisha Masale — Management Portal
             </p>
           </div>
 

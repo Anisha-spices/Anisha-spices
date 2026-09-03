@@ -75,7 +75,7 @@ export default function AdminSidebar() {
             {(!collapsed || mobileOpen) && (
               <div className="overflow-hidden">
                 <p className="text-white font-semibold text-sm leading-tight truncate">
-                  Aura Masale
+                  Anisha Masale
                 </p>
                 <p className="text-stone-500 text-xs truncate">Admin Panel</p>
               </div>

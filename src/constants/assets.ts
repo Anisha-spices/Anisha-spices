@@ -1,6 +1,6 @@
-// Centralized Asset Registry for Anisha Spices / Aura Masale
+// Centralized Asset Registry for Anisha Masale
 export const BRAND_CONFIG = {
-  name: 'Anisha Spices',
+  name: 'Anisha Masale',
   tagline: 'Pure Spice. Real Taste. Trusted Every Time.',
   subline: 'Pure, Natural & Full of Flavor',
 }

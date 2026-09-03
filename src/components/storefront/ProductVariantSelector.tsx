@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ShieldCheck, Truck, Package, MapPin, Check } from 'lucide-react'
+import { ShieldCheck, Truck, Package, MapPin, Check, Loader2 } from 'lucide-react'
 import { addToCart } from '@/actions/cart'
 import { useCart } from '@/contexts/CartContext'
 
@@ -33,32 +33,63 @@ export function ProductVariantSelector({ variants }: { variants: Variant[] }) {
   const [isBuying, setIsBuying] = useState(false)
   const [addedSuccess, setAddedSuccess] = useState(false)
   const [pincode, setPincode] = useState('')
+  const [isCheckingPincode, setIsCheckingPincode] = useState(false)
   const [pincodeResult, setPincodeResult] = useState<{
     status: 'idle' | 'success' | 'invalid'
     city?: string
+    state?: string
     time?: string
     cod?: boolean
+    message?: string
   }>({ status: 'idle' })
   const router = useRouter()
   const { refreshCart } = useCart()
 
-  const handleCheckPincode = (e: React.FormEvent) => {
+  const handleCheckPincode = async (e: React.FormEvent) => {
     e.preventDefault()
     const clean = pincode.trim()
     if (!/^\d{6}$/.test(clean)) {
-      setPincodeResult({ status: 'invalid' })
+      setPincodeResult({ 
+        status: 'invalid', 
+        message: 'Please enter a 6-digit Indian PIN code.' 
+      })
       return
     }
 
-    // Metro check (Delhi 11xxxx, Mumbai 40xxxx, Kolkata 70xxxx, Chennai 60xxxx, Bengaluru 56xxxx, Hyderabad 50xxxx)
-    const isMetro = /^(11|40|70|60|56|50)/.test(clean)
-    
-    setPincodeResult({
-      status: 'success',
-      city: isMetro ? 'Metro Area' : 'Standard Delivery',
-      time: isMetro ? '2–3 Business Days' : '3–5 Business Days',
-      cod: true,
-    })
+    setIsCheckingPincode(true)
+    try {
+      const res = await fetch(`/api/pincode?code=${clean}`)
+      const data = await res.json()
+
+      if (!data.valid) {
+        setPincodeResult({
+          status: 'invalid',
+          message: data.message || 'Invalid Indian Postal PIN code. Please enter a valid PIN code.',
+        })
+        return
+      }
+
+      // Metro check (Delhi 11, Mumbai 40, Kolkata 70, Chennai 60, Bengaluru 56, Hyderabad 50)
+      const isMetro = /^(11|40|70|60|56|50)/.test(clean)
+      const location = data.city ? `${data.city}, ${data.state}` : data.state || 'Your Location'
+
+      setPincodeResult({
+        status: 'success',
+        city: location,
+        state: data.state,
+        time: isMetro ? '2–3 Business Days' : '3–5 Business Days',
+        cod: true,
+      })
+    } catch {
+      // Fallback
+      setPincodeResult({
+        status: 'success',
+        time: '3–5 Business Days',
+        cod: true,
+      })
+    } finally {
+      setIsCheckingPincode(false)
+    }
   }
 
   if (activeVariants.length === 0) {
@@ -242,9 +273,11 @@ export function ProductVariantSelector({ variants }: { variants: Variant[] }) {
           />
           <button
             type="submit"
-            className="px-4 py-2 bg-[#7B111A] hover:bg-[#520C12] text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+            disabled={isCheckingPincode}
+            className="px-4 py-2 bg-[#7B111A] hover:bg-[#520C12] text-white text-xs font-bold rounded-xl transition-colors cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
           >
-            Check
+            {isCheckingPincode && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+            <span>{isCheckingPincode ? 'Checking...' : 'Check'}</span>
           </button>
         </form>
 
@@ -252,18 +285,21 @@ export function ProductVariantSelector({ variants }: { variants: Variant[] }) {
           <div className="mt-3 pt-2.5 border-t border-[#E8DFD5] text-xs space-y-1 animate-in fade-in duration-200">
             <p className="font-bold text-emerald-800 flex items-center gap-1.5">
               <span>✅</span>
-              <span>Delivery available in {pincodeResult.time}</span>
+              <span>
+                Verified Delivery to{' '}
+                <span className="underline decoration-[#7B111A]/40">{pincodeResult.city}</span> ({pincodeResult.time})
+              </span>
             </p>
             <p className="text-[#5A433B] flex items-center gap-1.5">
               <span>💵</span>
-              <span>Cash on Delivery (COD) Available</span>
+              <span>Cash on Delivery (COD) &amp; Online Payment Available</span>
             </p>
           </div>
         )}
 
         {pincodeResult.status === 'invalid' && (
           <p className="mt-2.5 text-xs font-medium text-rose-600 animate-in fade-in duration-200">
-            ⚠️ Please enter a valid 6-digit Indian delivery pincode.
+            ⚠️ {pincodeResult.message || 'Please enter a valid 6-digit Indian delivery pincode.'}
           </p>
         )}
       </div>

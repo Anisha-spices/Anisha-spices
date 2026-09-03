@@ -22,7 +22,7 @@ export async function Hero() {
         </div>
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-6 drop-shadow-md">
-            Welcome to Aura Masale
+            Welcome to Anisha Masale
           </h1>
           <p className="text-lg sm:text-xl lg:text-2xl text-stone-200 mb-10 max-w-2xl mx-auto drop-shadow">
             Experience the authentic taste of premium Indian spices.
