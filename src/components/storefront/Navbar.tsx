@@ -547,38 +547,21 @@ export function Navbar({
 
               {/* Navigation Links (Excludes Products since it's already in the main bottom bar) */}
               <div className="mt-6 flex flex-col space-y-3">
-                {navLinks
-                  .filter((link) => link.name !== 'Products')
-                  .map((link) => (
-                  <div key={link.name}>
-                    <Link
-                      href={link.href}
-                      onClick={(e) => {
-                        setMobileMenuOpen(false)
-                        if (link.href === '/') handleHomeClick(e)
-                      }}
-                      className="block text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-1.5"
-                    >
-                      {link.name}
-                    </Link>
-                    {link.hasDropdown && (
-                      <div className="pl-4 mt-1.5 space-y-2 border-l-2 border-white/20">
-                        {link.subItems?.map((subItem) => (
-                          <Link
-                            key={subItem.name}
-                            href={subItem.href}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="block text-sm text-stone-300 hover:text-white transition-colors py-1"
-                          >
-                            {subItem.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                {/* Home */}
+                <div>
+                  <Link
+                    href="/"
+                    onClick={(e) => {
+                      setMobileMenuOpen(false)
+                      handleHomeClick(e)
+                    }}
+                    className="block text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-1.5"
+                  >
+                    Home
+                  </Link>
+                </div>
 
-                {/* Your Orders Link in Hamburger Menu (Normal style like other links) */}
+                {/* Your Orders (Positioned above About Us & Contact) */}
                 <div>
                   <Link
                     href="/account/orders"
@@ -586,6 +569,28 @@ export function Navbar({
                     className="block text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-1.5"
                   >
                     Your Orders
+                  </Link>
+                </div>
+
+                {/* About Us */}
+                <div>
+                  <Link
+                    href="/about"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-1.5"
+                  >
+                    About Us
+                  </Link>
+                </div>
+
+                {/* Contact */}
+                <div>
+                  <Link
+                    href="/contact"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-1.5"
+                  >
+                    Contact
                   </Link>
                 </div>
               </div>
