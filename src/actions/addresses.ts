@@ -22,6 +22,31 @@ export async function addAddress(formData: FormData) {
     return { success: false, error: 'All required fields must be filled.' }
   }
 
+  // 1. Full name validation: At least 3 letters, alphabetic only
+  if (!/^[a-zA-Z\s.']{3,60}$/.test(fullName.trim())) {
+    return { 
+      success: false, 
+      error: 'Please enter a valid full name (at least 3 alphabetic characters, no numbers or special symbols).' 
+    }
+  }
+
+  // 2. Indian mobile number: 10 digits starting with 6, 7, 8, or 9
+  const cleanPhone = phone.trim().replace(/\D/g, '')
+  if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+    return { 
+      success: false, 
+      error: 'Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.' 
+    }
+  }
+
+  // 3. Street Address: Minimum 6 characters
+  if (addressLine1.trim().length < 6) {
+    return { 
+      success: false, 
+      error: 'Please enter a complete street address (House/Flat No., Building & Street - minimum 6 characters).' 
+    }
+  }
+
   if (!/^\d{6}$/.test(postalCode.trim())) {
     return { success: false, error: 'Please enter a valid 6-digit Indian PIN code.' }
   }
@@ -90,6 +115,31 @@ export async function updateAddress(id: string, formData: FormData) {
 
   if (!fullName || !phone || !addressLine1 || !city || !state || !postalCode) {
     return { success: false, error: 'All required fields must be filled.' }
+  }
+
+  // 1. Full name validation: At least 3 letters, alphabetic only
+  if (!/^[a-zA-Z\s.']{3,60}$/.test(fullName.trim())) {
+    return { 
+      success: false, 
+      error: 'Please enter a valid full name (at least 3 alphabetic characters, no numbers or special symbols).' 
+    }
+  }
+
+  // 2. Indian mobile number: 10 digits starting with 6, 7, 8, or 9
+  const cleanPhone = phone.trim().replace(/\D/g, '')
+  if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+    return { 
+      success: false, 
+      error: 'Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.' 
+    }
+  }
+
+  // 3. Street Address: Minimum 6 characters
+  if (addressLine1.trim().length < 6) {
+    return { 
+      success: false, 
+      error: 'Please enter a complete street address (House/Flat No., Building & Street - minimum 6 characters).' 
+    }
   }
 
   if (!/^\d{6}$/.test(postalCode.trim())) {

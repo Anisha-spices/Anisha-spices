@@ -107,12 +107,34 @@ export function AddressForm({
     e.preventDefault()
     setError(null)
 
+    const formData = new FormData(e.currentTarget)
+    const fullName = (formData.get('full_name')?.toString() || '').trim()
+    const phone = (formData.get('phone')?.toString() || '').trim().replace(/\D/g, '')
+    const addressLine1 = (formData.get('address_line_1')?.toString() || '').trim()
+
+    // 1. Full name validation: At least 3 letters, alphabetic & spaces only
+    if (!/^[a-zA-Z\s.']{3,60}$/.test(fullName)) {
+      setError('Please enter a valid full name (at least 3 alphabetic characters, no numbers or special symbols).')
+      return
+    }
+
+    // 2. Indian mobile phone: Exactly 10 digits starting with 6, 7, 8, or 9
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      setError('Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.')
+      return
+    }
+
+    // 3. Street Address: Minimum 6 characters
+    if (addressLine1.length < 6) {
+      setError('Please enter a complete street address (House/Flat No., Building & Street - minimum 6 characters).')
+      return
+    }
+
+    // 4. PIN code
     if (pincodeStatus.status === 'invalid') {
       setError('Please enter a valid Indian Postal PIN code before saving.')
       return
     }
-
-    const formData = new FormData(e.currentTarget)
 
     startTransition(async () => {
       const result = address
@@ -180,6 +202,7 @@ export function AddressForm({
                 id="full_name"
                 name="full_name"
                 defaultValue={address?.full_name}
+                autoComplete="name"
                 required
                 placeholder="e.g. Rahul Sharma"
                 className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1118]/20 focus:border-[#6B1118] focus:bg-white transition-all"
@@ -200,11 +223,12 @@ export function AddressForm({
                   id="phone"
                   name="phone"
                   defaultValue={address?.phone}
+                  autoComplete="tel"
                   required
                   maxLength={10}
-                  pattern="[0-9]{10}"
+                  pattern="[6-9][0-9]{9}"
                   placeholder="9876543210"
-                  className="w-full pl-12 pr-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1118]/20 focus:border-[#6B1118] focus:bg-white transition-all tracking-wider"
+                  className="w-full pl-12 pr-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1118]/20 focus:border-[#6B1118] focus:bg-white transition-all tracking-wider font-mono"
                 />
               </div>
             </div>
@@ -219,6 +243,7 @@ export function AddressForm({
                 id="address_line_1"
                 name="address_line_1"
                 defaultValue={address?.address_line_1}
+                autoComplete="address-line1"
                 required
                 placeholder="e.g. Flat 104, Sunrise Heights, Mall Road"
                 className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1118]/20 focus:border-[#6B1118] focus:bg-white transition-all"

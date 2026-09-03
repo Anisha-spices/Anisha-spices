@@ -174,6 +174,13 @@ export function CheckoutClient({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
 
+    if (name === 'phone') {
+      const cleanPhone = value.replace(/\D/g, '').slice(0, 10)
+      setFormData((prev) => ({ ...prev, phone: cleanPhone }))
+      if (error) setError(null)
+      return
+    }
+
     if (name === 'postal_code') {
       const cleanPin = value.replace(/\D/g, '').slice(0, 6)
       setFormData((prev) => ({ ...prev, postal_code: cleanPin }))
@@ -203,24 +210,35 @@ export function CheckoutClient({
         return
       }
     } else {
-      if (!formData.full_name.trim()) {
-        setError('Please enter your full name.')
+      // 1. Full name: At least 3 letters, alphabetic & spaces only
+      const trimmedName = formData.full_name.trim()
+      if (!/^[a-zA-Z\s.']{3,60}$/.test(trimmedName)) {
+        setError('Please enter a valid full name (at least 3 alphabetic characters, no numbers or symbols).')
         return
       }
-      if (!formData.phone.trim() || formData.phone.trim().length < 10) {
-        setError('Please enter a valid 10-digit mobile number.')
+
+      // 2. Mobile phone: Exactly 10 digits starting with 6, 7, 8, or 9
+      const cleanPhone = formData.phone.trim().replace(/\D/g, '')
+      if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+        setError('Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.')
         return
       }
-      if (!formData.address_line_1.trim()) {
-        setError('Please enter your house / flat number and street address.')
+
+      // 3. Street Address: Minimum 6 characters
+      if (formData.address_line_1.trim().length < 6) {
+        setError('Please enter a complete street address (House/Flat No., Building & Street - minimum 6 characters).')
         return
       }
+
+      // 4. City / Area
       if (!formData.city.trim()) {
-        setError('Please enter your city.')
+        setError('Please select or enter your delivery city / area.')
         return
       }
-      if (!formData.postal_code.trim() || formData.postal_code.trim().length < 6) {
-        setError('Please enter a valid 6-digit PIN code.')
+
+      // 5. PIN code
+      if (!/^\d{6}$/.test(formData.postal_code.trim())) {
+        setError('Please enter a valid 6-digit Indian PIN code.')
         return
       }
       if (pincodeStatus.status === 'invalid') {
@@ -404,6 +422,7 @@ export function CheckoutClient({
                     name="full_name"
                     type="text"
                     required
+                    autoComplete="name"
                     value={formData.full_name}
                     onChange={handleInputChange}
                     placeholder="e.g. Ramesh Kumar"
@@ -426,10 +445,11 @@ export function CheckoutClient({
                       type="tel"
                       required
                       maxLength={10}
+                      autoComplete="tel"
                       value={formData.phone}
                       onChange={handleInputChange}
                       placeholder="9876543210"
-                      className="w-full pl-12 pr-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1118]/20 focus:border-[#6B1118] focus:bg-white transition-all tracking-wider"
+                      className="w-full pl-12 pr-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1118]/20 focus:border-[#6B1118] focus:bg-white transition-all tracking-wider font-mono"
                     />
                   </div>
                 </div>
@@ -443,6 +463,7 @@ export function CheckoutClient({
                     id="email"
                     name="email"
                     type="email"
+                    autoComplete="email"
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="yourname@gmail.com"
@@ -460,6 +481,7 @@ export function CheckoutClient({
                     name="address_line_1"
                     type="text"
                     required
+                    autoComplete="address-line1"
                     value={formData.address_line_1}
                     onChange={handleInputChange}
                     placeholder="e.g. Flat 402, Royal Residency, M.G. Road"

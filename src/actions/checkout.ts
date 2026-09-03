@@ -91,19 +91,48 @@ export async function createOrder(
         return { success: false, error: 'Please fill in all required shipping fields.' }
       }
 
-      if (!/^\d{6}$/.test(addressInput.postal_code.trim())) {
+      // 1. Full name validation: At least 3 letters, alphabetic & spaces only
+      const trimmedName = (addressInput.full_name || '').trim()
+      if (!/^[a-zA-Z\s.']{3,60}$/.test(trimmedName)) {
+        return { 
+          success: false, 
+          error: 'Please enter a valid full name (at least 3 alphabetic characters, no numbers or special symbols).' 
+        }
+      }
+
+      // 2. Indian mobile number validation: strictly 10 digits starting with 6, 7, 8, or 9
+      const cleanPhone = (addressInput.phone || '').trim().replace(/\D/g, '')
+      if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+        return { 
+          success: false, 
+          error: 'Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.' 
+        }
+      }
+
+      // 3. Street Address validation: Minimum 6 characters
+      const trimmedAddress1 = (addressInput.address_line_1 || '').trim()
+      if (trimmedAddress1.length < 6) {
+        return { 
+          success: false, 
+          error: 'Please enter a complete street address (House/Flat No., Building & Street - minimum 6 characters).' 
+        }
+      }
+
+      // 4. PIN code validation
+      const cleanPin = (addressInput.postal_code || '').trim()
+      if (!/^\d{6}$/.test(cleanPin)) {
         return { success: false, error: 'Please enter a valid 6-digit Indian PIN code.' }
       }
 
       shippingAddressSnapshot = {
-        full_name: addressInput.full_name.trim(),
-        phone: addressInput.phone.trim(),
+        full_name: trimmedName,
+        phone: cleanPhone,
         email: addressInput.email?.trim() || user?.email || '',
-        address_line_1: addressInput.address_line_1.trim(),
+        address_line_1: trimmedAddress1,
         address_line_2: addressInput.address_line_2?.trim() || null,
         city: addressInput.city.trim(),
         state: addressInput.state.trim(),
-        postal_code: addressInput.postal_code.trim(),
+        postal_code: cleanPin,
         country: addressInput.country || 'India',
       }
 
@@ -173,7 +202,7 @@ export async function createOrder(
       targetUserId = fallbackProfile?.id || null
     }
 
-    // 5. Calculate totals securely
+    // 5. Verify stock availability and calculate totals securely
     let subtotal = 0
     const orderItemsToInsert: any[] = []
 
@@ -182,10 +211,21 @@ export async function createOrder(
       if (!variant) continue
 
       const product = Array.isArray(variant.products) ? variant.products[0] : variant.products
+      const currentStock = Number(variant.stock_quantity ?? 0)
+      const requestedQty = Number(item.quantity || 1)
+
+      // Stock check: Prevent overselling
+      if (currentStock < requestedQty) {
+        return {
+          success: false,
+          error: currentStock === 0
+            ? `Sorry, "${product?.name || 'Product'} (${variant.variant_name})" is currently out of stock.`
+            : `Only ${currentStock} unit(s) remaining for "${product?.name || 'Product'} (${variant.variant_name})". Please update your cart.`
+        }
+      }
 
       const price = Number(variant.price || 0)
-      const quantity = Number(item.quantity || 1)
-      const lineTotal = price * quantity
+      const lineTotal = price * requestedQty
 
       subtotal += lineTotal
 
@@ -195,7 +235,7 @@ export async function createOrder(
         product_name: product?.name || 'Spice Product',
         variant_name: variant.variant_name || 'Standard Pack',
         price_at_purchase: price,
-        quantity: quantity,
+        quantity: requestedQty,
         line_total: lineTotal,
       })
     }
@@ -243,9 +283,30 @@ export async function createOrder(
 
     if (itemsError) {
       console.error('Failed to insert order items:', itemsError)
-      // Even if items had an issue, order is logged, but return clean message
       return { success: false, error: 'Order item processing failed. Please contact support.' }
     }
+
+    // 8. Auto-Deduct Inventory Stock
+    for (const item of items) {
+      const variant: any = item.product_variants
+      if (!variant?.id) continue
+
+      const currentStock = Number(variant.stock_quantity ?? 0)
+      const purchasedQty = Number(item.quantity || 1)
+      const newStock = Math.max(0, currentStock - purchasedQty)
+
+      await adminClient
+        .from('product_variants')
+        .update({
+          stock_quantity: newStock,
+          is_active: newStock > 0,
+        })
+        .eq('id', variant.id)
+    }
+
+    revalidatePath('/products')
+    revalidatePath('/cart')
+    revalidatePath('/admin/products')
 
     // 8. Handle Payment Method Specific Logic
     if (paymentMethod === 'RAZORPAY') {
