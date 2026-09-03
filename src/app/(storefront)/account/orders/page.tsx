@@ -9,6 +9,8 @@ export const metadata = {
   title: 'My Orders & Live Tracking | Anisha Spices',
 }
 
+export const dynamic = 'force-dynamic'
+
 const ORDER_STEPS = [
   { key: 'pending', label: 'Order Placed', desc: 'Received & Confirmed' },
   { key: 'processing', label: 'Packed', desc: 'Aroma-Lock Sealing' },

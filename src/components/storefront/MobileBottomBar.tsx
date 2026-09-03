@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, Sparkles, Search, ShoppingBag, X, ArrowRight, BookOpen, Loader2, Package, User } from 'lucide-react'
+import { Home, Sparkles, Search, ShoppingBag, X, ArrowRight, Loader2, Package, User } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 
 const POPULAR_SEARCHES = [
@@ -244,16 +244,7 @@ export function MobileBottomBar() {
             <span className="text-[10px] font-medium tracking-tight">Products</span>
           </Link>
 
-          {/* 3. Uses (Standard Flat Tab like Home & Orders) */}
-          <button
-            onClick={() => handleScrollToSection('uses')}
-            className="flex flex-col items-center justify-center py-1 px-3 rounded-xl text-white/70 hover:text-white transition-all duration-200 active:scale-90 cursor-pointer"
-          >
-            <BookOpen className="w-5 h-5 mb-0.5" />
-            <span className="text-[10px] font-medium tracking-tight">Uses</span>
-          </button>
-
-          {/* 4. Cart (Left of Profile) */}
+          {/* 3. Cart */}
           <Link
             href="/cart"
             className={`relative flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 active:scale-90 ${

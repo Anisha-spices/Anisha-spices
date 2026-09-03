@@ -66,10 +66,10 @@ export async function HeroSection() {
                 <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Link>
               <Link
-                href="/#uses"
+                href="/about"
                 className="flex-1 sm:flex-initial inline-flex items-center justify-center rounded-full border border-[#B3927D] bg-white/70 backdrop-blur-sm px-4 sm:px-8 py-2.5 sm:py-3.5 text-xs sm:text-base font-semibold text-[#2A1612] hover:bg-[#F2E8DC] hover:border-[#7B111A] transition-all text-center whitespace-nowrap"
               >
-                Explore Uses
+                Our Story
               </Link>
             </div>
 

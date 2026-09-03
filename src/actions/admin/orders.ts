@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 
@@ -30,24 +31,35 @@ export async function updateOrderStatus(orderId: string, status: string) {
   const supabase = await createClient()
   
   const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  if (!isAdmin) return { success: false, error: 'Unauthorized: Admin access required' }
 
-  const updateData: any = { order_status: status }
+  const updateData: any = { 
+    order_status: status,
+    updated_at: new Date().toISOString()
+  }
   
   // Set timestamps based on new status
   if (status === 'shipped') updateData.shipped_at = new Date().toISOString()
   if (status === 'delivered') updateData.delivered_at = new Date().toISOString()
   if (status === 'cancelled') updateData.cancelled_at = new Date().toISOString()
 
-  const { error } = await supabase
+  // Use Admin client to reliably update orders bypassing RLS
+  const adminClient = createAdminClient()
+  const { error } = await adminClient
     .from('orders')
     .update(updateData)
     .eq('id', orderId)
 
-  if (error) return { success: false, error: error.message }
+  if (error) {
+    console.error('Failed to update order status:', error)
+    return { success: false, error: error.message }
+  }
 
   revalidatePath('/admin/orders')
   revalidatePath(`/admin/orders/${orderId}`)
+  revalidatePath('/account/orders')
+  revalidatePath('/account')
+  revalidatePath('/', 'layout')
   return { success: true }
 }
 
@@ -55,21 +67,32 @@ export async function updatePaymentStatus(orderId: string, status: string) {
   const supabase = await createClient()
   
   const isAdmin = await checkAdminAuth(supabase)
-  if (!isAdmin) return { success: false, error: 'Unauthorized' }
+  if (!isAdmin) return { success: false, error: 'Unauthorized: Admin access required' }
 
-  const updateData: any = { payment_status: status }
+  const updateData: any = { 
+    payment_status: status,
+    updated_at: new Date().toISOString()
+  }
   
   // Set timestamps based on new status
   if (status === 'paid') updateData.paid_at = new Date().toISOString()
 
-  const { error } = await supabase
+  // Use Admin client to reliably update orders bypassing RLS
+  const adminClient = createAdminClient()
+  const { error } = await adminClient
     .from('orders')
     .update(updateData)
     .eq('id', orderId)
 
-  if (error) return { success: false, error: error.message }
+  if (error) {
+    console.error('Failed to update payment status:', error)
+    return { success: false, error: error.message }
+  }
 
   revalidatePath('/admin/orders')
   revalidatePath(`/admin/orders/${orderId}`)
+  revalidatePath('/account/orders')
+  revalidatePath('/account')
+  revalidatePath('/', 'layout')
   return { success: true }
 }

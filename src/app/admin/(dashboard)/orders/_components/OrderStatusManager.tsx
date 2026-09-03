@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { updateOrderStatus, updatePaymentStatus } from '@/actions/admin/orders'
 import { Check, Loader2 } from 'lucide-react'
 
@@ -16,6 +17,7 @@ export function OrderStatusManager({
   initialOrderStatus: string
   initialPaymentStatus: string
 }) {
+  const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -33,6 +35,7 @@ export function OrderStatusManager({
         setError(result.error)
       } else {
         setSuccess(true)
+        router.refresh()
         setTimeout(() => setSuccess(false), 2000)
       }
     })

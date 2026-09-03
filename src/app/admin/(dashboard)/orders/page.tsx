@@ -8,6 +8,8 @@ export const metadata = {
   title: 'Orders | Admin Dashboard',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminOrdersPage() {
   const cookieStore = await cookies()
   const isAdminCookie = cookieStore.get('admin_session')?.value === 'authenticated'

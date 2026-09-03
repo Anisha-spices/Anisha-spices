@@ -44,7 +44,6 @@ export function Navbar({
       hasDropdown: true,
       subItems: dynamicSubItems,
     },
-    { name: 'Uses', href: '/#uses' },
     { name: 'About Us', href: '/about' },
     { name: 'Contact', href: '/contact' },
   ]

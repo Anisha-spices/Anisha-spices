@@ -10,6 +10,8 @@ export const metadata = {
   title: 'Order Details | Admin Dashboard',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminOrderDetailsPage({
   params,
 }: {
@@ -52,20 +54,40 @@ export default async function AdminOrderDetailsPage({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link 
-          href="/admin/orders"
-          className="p-2 bg-white border border-stone-200 text-stone-600 rounded-xl hover:bg-stone-50 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-stone-900">Order {order.order_number}</h1>
-          <p className="text-sm text-stone-500 mt-1">
-            Placed on {new Date(order.created_at).toLocaleString('en-IN', {
-              day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-            })}
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link 
+            href="/admin/orders"
+            className="p-2 bg-white border border-stone-200 text-stone-600 rounded-xl hover:bg-stone-50 transition-colors shrink-0"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-2xl font-bold text-stone-900">Order {order.order_number}</h1>
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border uppercase tracking-wider ${
+                order.order_status === 'delivered' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                order.order_status === 'shipped' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                order.order_status === 'processing' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
+                order.order_status === 'cancelled' ? 'bg-red-50 text-red-700 border-red-200' :
+                'bg-orange-50 text-orange-700 border-orange-200'
+              }`}>
+                {order.order_status}
+              </span>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border uppercase tracking-wider ${
+                order.payment_status === 'paid' ? 'bg-green-50 text-green-700 border-green-200' :
+                order.payment_status === 'failed' ? 'bg-red-50 text-red-700 border-red-200' :
+                'bg-stone-100 text-stone-600 border-stone-200'
+              }`}>
+                Payment: {order.payment_status}
+              </span>
+            </div>
+            <p className="text-sm text-stone-500 mt-1">
+              Placed on {new Date(order.created_at).toLocaleString('en-IN', {
+                day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+              })}
+            </p>
+          </div>
         </div>
       </div>
 
