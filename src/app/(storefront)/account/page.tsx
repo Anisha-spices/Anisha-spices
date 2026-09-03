@@ -57,12 +57,6 @@ export default async function AccountProfilePage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-center">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>Active Account</span>
-            </span>
-          </div>
         </div>
 
         {/* 3 Quick Stat Metric Badges */}
