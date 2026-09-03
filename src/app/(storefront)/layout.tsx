@@ -4,6 +4,7 @@ import { CartProvider } from '@/contexts/CartContext'
 import { getCartCount } from '@/actions/cart'
 import { AnnouncementBar } from '@/components/storefront/AnnouncementBar'
 import { FloatingContact } from '@/components/storefront/FloatingContact'
+import { ChatbotWidget } from '@/components/storefront/ChatbotWidget'
 import { MobileBottomBar } from '@/components/storefront/MobileBottomBar'
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
@@ -63,6 +64,7 @@ export default async function StorefrontLayout({
         <main className="flex-grow pb-16 lg:pb-0">{children}</main>
         <Footer />
         <FloatingContact />
+        <ChatbotWidget />
         <MobileBottomBar />
       </div>
     </CartProvider>
