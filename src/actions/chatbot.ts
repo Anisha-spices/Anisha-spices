@@ -57,16 +57,9 @@ const DEFAULT_CHATBOT_CONFIG: ChatbotConfig = {
       id: 'opt_bulk',
       label: '💼 Wholesale & Bulk Inquiries',
       type: 'faq_answer',
-      answer: `We supply authentic whole and ground spices to premium restaurants, cloud kitchens, and retailers at special B2B wholesale pricing. Please click 'Chat on WhatsApp' below to speak directly with our commercial desk!`,
+      answer: `We supply authentic whole and ground spices to premium restaurants, cloud kitchens, and retailers at special B2B wholesale pricing. Please reach out to our team for bulk inquiries!`,
       is_active: true,
       display_order: 4,
-    },
-    {
-      id: 'opt_whatsapp',
-      label: '💬 Chat on WhatsApp',
-      type: 'whatsapp',
-      is_active: true,
-      display_order: 5,
     },
   ],
 }

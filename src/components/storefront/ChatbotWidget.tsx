@@ -333,43 +333,13 @@ export function ChatbotWidget() {
                     {selectedFaq.answer || 'Details not available.'}
                   </div>
                 </div>
-
-                <div className="p-3 bg-orange-50/60 rounded-xl border border-orange-200/60 flex items-center justify-between text-xs">
-                  <span className="text-stone-700 font-medium">Still have questions?</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const waUrl = `https://wa.me/${config.whatsapp_number}?text=${encodeURIComponent(
-                        `Hi Anisha Spices, I have a query about: ${selectedFaq.label}`
-                      )}`
-                      window.open(waUrl, '_blank')
-                    }}
-                    className="font-bold text-emerald-700 hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <Phone className="w-3 h-3" />
-                    Ask on WhatsApp
-                  </button>
-                </div>
               </div>
             )}
           </div>
 
           {/* Footer Bar */}
-          <div className="p-3 bg-white border-t border-stone-200 flex items-center justify-between text-[11px] text-stone-500 shrink-0">
-            <button
-              type="button"
-              onClick={() => {
-                const waUrl = `https://wa.me/${config.whatsapp_number}?text=${encodeURIComponent(
-                  config.whatsapp_message
-                )}`
-                window.open(waUrl, '_blank')
-              }}
-              className="text-emerald-700 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
-            >
-              <Phone className="w-3 h-3" />
-              Chat on WhatsApp
-            </button>
-            <span className="text-[10px] text-stone-400">Pure Spices • Instant Help</span>
+          <div className="p-3 bg-white border-t border-stone-200 flex items-center justify-center text-[11px] text-stone-400 shrink-0">
+            <span>Anisha Spices • 100% Pure & Authentic</span>
           </div>
         </div>
       )}
