@@ -18,7 +18,6 @@ import {
   ChevronRight,
   Star,
   X,
-  Bot,
 } from 'lucide-react'
 import { useAdminNav } from '@/contexts/AdminNavContext'
 
@@ -34,7 +33,6 @@ const navItems = [
   { label: 'Announcements', href: '/admin/announcements', icon: Megaphone },
   { label: 'Delivery Settings', href: '/admin/settings/shipping', icon: Truck },
   { label: 'Global FAQs', href: '/admin/settings/faqs', icon: Settings },
-  { label: 'Chatbot Settings', href: '/admin/settings/chatbot', icon: Bot },
 ]
 
 export default function AdminSidebar() {
