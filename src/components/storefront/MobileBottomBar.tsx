@@ -307,7 +307,7 @@ export function MobileBottomBar({
         aria-label="Mobile Navigation"
         className="fixed bottom-3 inset-x-3 z-40 lg:hidden transform-gpu will-change-transform select-none"
       >
-        <div className="bg-[#240A0D]/90 backdrop-blur-xl border border-white/15 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] px-2.5 py-2 flex items-center justify-around">
+        <div className="bg-[#240A0D]/90 backdrop-blur-xl border border-white/15 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] px-1.5 py-1.5 flex items-center justify-between">
           
           {/* 1. Home */}
           <Link
@@ -317,7 +317,7 @@ export function MobileBottomBar({
                 window.scrollTo({ top: 0, behavior: 'smooth' })
               }
             }}
-            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-colors duration-150 active:opacity-75 ${
+            className={`flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors duration-150 active:opacity-75 ${
               isHome && !searchOpen && !categoriesOpen
                 ? 'text-[#F5D0A9] bg-white/10'
                 : 'text-white/70 hover:text-white'
@@ -334,7 +334,7 @@ export function MobileBottomBar({
               setCategoriesOpen(!categoriesOpen)
               setSearchOpen(false)
             }}
-            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-colors duration-150 active:opacity-75 cursor-pointer ${
+            className={`flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors duration-150 active:opacity-75 cursor-pointer ${
               categoriesOpen
                 ? 'text-[#F5D0A9] bg-white/10'
                 : 'text-white/70 hover:text-white'
@@ -347,7 +347,7 @@ export function MobileBottomBar({
           {/* 3. Products */}
           <Link
             href="/shop"
-            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-colors duration-150 active:opacity-75 ${
+            className={`flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors duration-150 active:opacity-75 ${
               isShop && !searchOpen && !categoriesOpen
                 ? 'text-[#F5D0A9] bg-white/10'
                 : 'text-white/70 hover:text-white'
@@ -360,16 +360,16 @@ export function MobileBottomBar({
           {/* 4. Cart */}
           <Link
             href="/cart"
-            className={`relative flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-colors duration-150 active:opacity-75 ${
+            className={`flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors duration-150 active:opacity-75 ${
               isCart
                 ? 'text-[#F5D0A9] bg-white/10'
                 : 'text-white/70 hover:text-white'
             }`}
           >
-            <div className="relative">
-              <ShoppingBag className="w-5 h-5 mb-0.5" />
+            <div className="w-6 h-6 flex items-center justify-center relative">
+              <ShoppingBag className="w-5 h-5" />
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-[#E53E3E] text-white text-[9px] font-bold flex items-center justify-center shadow-sm">
+                <span className="absolute -top-1 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-[#E53E3E] text-white text-[9px] font-bold flex items-center justify-center shadow-sm pointer-events-none">
                   {itemCount}
                 </span>
               )}
@@ -380,7 +380,7 @@ export function MobileBottomBar({
           {/* 5. Profile Tab */}
           <Link
             href="/account"
-            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-colors duration-150 active:opacity-75 ${
+            className={`flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors duration-150 active:opacity-75 ${
               pathname?.startsWith('/account') || pathname === '/login'
                 ? 'text-[#F5D0A9] bg-white/10'
                 : 'text-white/70 hover:text-white'

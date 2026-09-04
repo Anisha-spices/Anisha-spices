@@ -119,7 +119,7 @@ export function CartItemsList({
             return (
               <div 
                 key={item.id} 
-                className={`bg-white rounded-3xl border border-[#E8DFD5] p-4 sm:p-6 shadow-xs hover:shadow-md transition-all flex gap-4 sm:gap-6 items-center ${isLoading ? 'opacity-60 pointer-events-none' : ''}`}
+                className={`bg-white rounded-3xl border border-[#E8DFD5] p-3.5 sm:p-6 shadow-xs hover:shadow-md transition-all flex gap-3 sm:gap-6 items-center ${isLoading ? 'opacity-60 pointer-events-none' : ''}`}
               >
                 {/* Product Photo */}
                 <Link href={`/product/${product.slug}`} className="shrink-0 group">
@@ -143,17 +143,17 @@ export function CartItemsList({
                 {/* Info & Quantity */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <Link href={`/product/${product.slug}`}>
                         <h3 className="text-sm sm:text-base font-bold text-[#2A1612] truncate hover:text-[#7B111A] transition-colors">
                           {product.name}
                         </h3>
                       </Link>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="px-2.5 py-0.5 rounded-full bg-[#FAF6F2] border border-[#E8DFD5] text-[11px] font-bold text-[#8C7567]">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1">
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#FAF6F2] border border-[#E8DFD5] text-[11px] font-bold text-[#8C7567] shrink-0">
                           {variant.variant_name}
                         </span>
-                        <span className="text-xs text-emerald-700 font-medium">In Stock</span>
+                        <span className="text-xs text-emerald-700 font-medium shrink-0">In Stock</span>
                       </div>
                     </div>
 
@@ -161,7 +161,7 @@ export function CartItemsList({
                     <button
                       onClick={() => handleRemove(item.id)}
                       disabled={isLoading}
-                      className="p-2 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                      className="p-2 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer shrink-0"
                       title="Remove spice"
                     >
                       <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />

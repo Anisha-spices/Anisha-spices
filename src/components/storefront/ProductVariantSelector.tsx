@@ -217,10 +217,10 @@ export function ProductVariantSelector({ variants }: { variants: Variant[] }) {
           <button 
             onClick={handleAddToCart}
             disabled={isAdding || isBuying || addedSuccess}
-            className={`flex-1 font-bold rounded-full h-10 sm:h-12 text-xs sm:text-base transition-all duration-200 inline-flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs ${
+            className={`flex-1 font-bold rounded-full h-10 sm:h-12 text-xs sm:text-base transition-all duration-200 inline-flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs border-2 ${
               addedSuccess
-                ? 'bg-emerald-600 text-white shadow-emerald-900/20'
-                : 'bg-white border-2 border-[#7B111A] text-[#7B111A] hover:bg-[#7B111A]/5 active:scale-[0.98]'
+                ? 'bg-emerald-600 border-emerald-600 text-white shadow-emerald-900/20'
+                : 'bg-white border-[#7B111A] text-[#7B111A] hover:bg-[#7B111A]/5 active:scale-[0.98]'
             }`}
           >
             {isAdding ? (
