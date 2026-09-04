@@ -2,11 +2,11 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { User, MapPin, Package, LogOut, LayoutDashboard } from 'lucide-react'
+import { User, MapPin, Package, LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
-export function AccountNav({ isAdmin }: { isAdmin?: boolean }) {
+export function AccountNav() {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
@@ -25,16 +25,6 @@ export function AccountNav({ isAdmin }: { isAdmin?: boolean }) {
 
   return (
     <div className="flex flex-col divide-y divide-[#F2E8DC]">
-      {isAdmin && (
-        <Link
-          href="/admin"
-          className="flex items-center gap-3 px-6 py-4 text-xs sm:text-sm font-bold transition-colors text-amber-700 bg-[#FAF6F2] hover:bg-[#F2E8DC]"
-        >
-          <LayoutDashboard className="w-4 h-4 text-[#C89B65]" />
-          <span>Admin Dashboard</span>
-        </Link>
-      )}
-
       {links.map((link) => {
         const Icon = link.icon
         const isActive = pathname === link.href || (link.href !== '/account' && pathname.startsWith(link.href))

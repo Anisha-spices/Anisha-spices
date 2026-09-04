@@ -42,7 +42,7 @@ export default async function AccountLayout({
     }
   }
 
-  const isAdmin = profile?.role === 'admin' || hasAdminCookie
+  const isAdmin = profile?.role === 'admin'
   const initials = (profile?.full_name || 'Customer')
     .split(' ')
     .map((n: string) => n[0])
@@ -78,7 +78,7 @@ export default async function AccountLayout({
             
             {/* Account Navigation Tabs */}
             <nav className="bg-white rounded-3xl border border-[#E8DFD5] overflow-hidden shadow-xs">
-              <AccountNav isAdmin={isAdmin} />
+              <AccountNav />
             </nav>
           </aside>
 
