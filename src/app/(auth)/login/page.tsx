@@ -34,7 +34,7 @@ function LoginForm() {
   }
 
   const fillDemoAccount = () => {
-    setEmail('demo@auramasale.com')
+    setEmail('demo@anishamasala.com')
     setPassword('DemoUser@123')
     setMode('password')
     setError('')
@@ -101,7 +101,7 @@ function LoginForm() {
             <span>Demo Customer Access</span>
           </div>
           <p className="text-[11px] text-[#8C7567] mt-0.5 truncate">
-            Demo Customer · demo@auramasale.com
+            Demo Customer · demo@anishamasala.com
           </p>
         </div>
         <button
@@ -166,7 +166,7 @@ function LoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="demo@auramasale.com"
+                placeholder="demo@anishamasala.com"
                 className="w-full px-4 py-3 pl-11 rounded-xl border border-[#D4C7BA] bg-white text-[#2A1612] placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#7B111A]/30 focus:border-[#7B111A] text-sm transition-all shadow-inner"
               />
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />

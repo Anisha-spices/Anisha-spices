@@ -15,7 +15,7 @@
 ```bash
 # Clone the repository
 git clone <repo-url>
-cd aura-masale
+cd Anisha-spices
 
 # Install dependencies
 npm install
@@ -36,8 +36,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
 SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
 
 # Admin Credentials
-ADMIN_EMAIL="admin@auramasale.com"
-ADMIN_PASSWORD="your-admin-password"
+ADMIN_EMAIL="admin@anishamasala.com"
+ADMIN_PASSWORD="admin@123"
 
 # Razorpay (Optional for Online Payments) (currently not using [as of september 1st week])
 RAZORPAY_KEY_ID="rzp_test_..."
@@ -55,8 +55,8 @@ CLOUDINARY_API_SECRET="your-api-secret"
 
 | Role | Email | Password | Access URL |
 |---|---|---|---|
-| **Store Admin** | `admin@auramasale.com` | `admin123` | [`/admin`](http://localhost:3000/admin) |
-| **Demo Customer** | `demo@auramasale.com` | `DemoUser@123` | [`/login`](http://localhost:3000/login) |
+| **Store Admin** | `admin@anishamasala.com` | `admin@123` | [`/admin`](http://localhost:3000/admin) |
+| **Demo Customer** | `demo@anishamasala.com` | `DemoUser@123` | [`/login`](http://localhost:3000/login) |
 
 ---
 

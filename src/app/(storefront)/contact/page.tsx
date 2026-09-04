@@ -24,9 +24,9 @@ export default function ContactPage() {
     },
     {
       title: 'Email Inquiries',
-      desc: 'info@auramasale.com (We respond within 24 business hours)',
+      desc: 'info@anishamasala.com (We respond within 24 business hours)',
       actionText: 'Send an Email',
-      actionHref: 'mailto:info@auramasale.com',
+      actionHref: 'mailto:info@anishamasala.com',
       icon: <Mail className="w-5 h-5" />,
     },
     {

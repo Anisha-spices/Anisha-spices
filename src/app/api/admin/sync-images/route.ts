@@ -75,7 +75,7 @@ export async function POST() {
       {
         id: '068a9402-1afc-4f64-a5a2-a9e549e3c00b',
         full_name: 'Store Administrator',
-        email: 'admin@auramasale.com',
+        email: 'admin@anishamasala.com',
         phone: '+919999999999',
         role: 'admin',
         is_active: true,

@@ -37,7 +37,7 @@ export default async function AccountLayout({
       .maybeSingle()
     profile = data || {
       full_name: 'Store Administrator',
-      email: 'admin@auramasale.com',
+      email: 'admin@anishamasala.com',
       role: 'admin',
     }
   }

@@ -1,5 +1,5 @@
 -- =============================================================
--- Aura Masale — Complete Database Schema
+-- Anisha Masale — Complete Database Schema
 -- =============================================================
 -- Technology: Supabase PostgreSQL + Supabase Auth + Cloudinary
 -- Notes:

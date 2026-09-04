@@ -155,8 +155,8 @@ export async function adminLogin(
     return { error: 'Email and password are required' }
   }
 
-  const defaultAdminEmail = (process.env.ADMIN_EMAIL || 'admin@auramasale.com').trim().toLowerCase()
-  const defaultAdminPassword = process.env.ADMIN_PASSWORD || 'admin123'
+  const defaultAdminEmail = (process.env.ADMIN_EMAIL || 'admin@anishamasala.com').trim().toLowerCase()
+  const defaultAdminPassword = process.env.ADMIN_PASSWORD || 'admin@123'
 
   // 1. Direct admin credential check for immediate dashboard access
   const isDefaultAdmin = email === defaultAdminEmail && password === defaultAdminPassword

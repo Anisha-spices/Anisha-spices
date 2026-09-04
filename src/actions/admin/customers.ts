@@ -65,7 +65,7 @@ export async function getCustomers() {
     }
   })
 
-  const defaultAdminEmail = (process.env.ADMIN_EMAIL || 'admin@auramasale.com').trim().toLowerCase()
+  const defaultAdminEmail = (process.env.ADMIN_EMAIL || 'admin@anishamasala.com').trim().toLowerCase()
 
   // Add or augment with order history
   orders?.forEach((o) => {
