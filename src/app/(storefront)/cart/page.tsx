@@ -18,7 +18,7 @@ export default async function CartPage() {
   ])
 
   return (
-    <div className="bg-[#F8ECE7] min-h-screen py-8 sm:py-12 text-[#2A1612]">
+    <div className="bg-[#F8ECE7] min-h-screen pt-8 pb-28 sm:py-12 text-[#2A1612]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Cart Page Title & Counter */}
