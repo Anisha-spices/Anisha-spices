@@ -39,11 +39,12 @@ export function Navbar({
   const navLinks: NavLink[] = [
     { name: 'Home', href: '/' },
     {
-      name: 'Products',
+      name: 'Categories',
       href: '/shop',
       hasDropdown: true,
       subItems: dynamicSubItems,
     },
+    { name: 'All Spices', href: '/shop' },
     { name: 'About Us', href: '/about' },
     { name: 'Contact', href: '/contact' },
   ]
@@ -52,7 +53,8 @@ export function Navbar({
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
-  const [productsDropdownOpen, setProductsDropdownOpen] = useState(false)
+  const [categoriesDropdownOpen, setCategoriesDropdownOpen] = useState(false)
+  const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -115,7 +117,7 @@ export function Navbar({
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setProductsDropdownOpen(false)
+        setCategoriesDropdownOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -125,7 +127,7 @@ export function Navbar({
   // Close mobile drawer on route change
   useEffect(() => {
     setMobileMenuOpen(false)
-    setProductsDropdownOpen(false)
+    setCategoriesDropdownOpen(false)
   }, [pathname])
 
   // Body scroll lock & ESC key
@@ -181,27 +183,41 @@ export function Navbar({
               {navLinks.map((link) => {
                 if (link.hasDropdown) {
                   return (
-                    <div key={link.name} className="relative" ref={dropdownRef}>
+                    <div
+                      key={link.name}
+                      className="relative py-2"
+                      ref={dropdownRef}
+                      onMouseEnter={() => setCategoriesDropdownOpen(true)}
+                      onMouseLeave={() => setCategoriesDropdownOpen(false)}
+                    >
                       <button
-                        onClick={() => setProductsDropdownOpen(!productsDropdownOpen)}
-                        className="flex items-center gap-1 text-[15px] font-medium text-stone-100 hover:text-[#E5AD58] transition-colors py-2 cursor-pointer"
+                        type="button"
+                        onClick={() => setCategoriesDropdownOpen(!categoriesDropdownOpen)}
+                        className="flex items-center gap-1.5 text-[15px] font-medium text-stone-100 hover:text-[#E5AD58] transition-colors py-1 cursor-pointer"
                       >
-                        {link.name}
+                        <span>{link.name}</span>
                         <ChevronDown
-                          className={`h-4 w-4 transition-transform duration-200 ${productsDropdownOpen ? 'rotate-180 text-[#E5AD58]' : 'text-stone-300'
-                            }`}
+                          className={`h-4 w-4 transition-transform duration-200 ${
+                            categoriesDropdownOpen ? 'rotate-180 text-[#E5AD58]' : 'text-stone-300'
+                          }`}
                         />
                       </button>
-                      {productsDropdownOpen && (
-                        <div className="absolute top-full left-0 mt-1 w-52 rounded-xl bg-white text-[#2A1612] shadow-2xl border border-[#E8DFD5] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                      {categoriesDropdownOpen && (
+                        <div className="absolute top-full left-0 mt-0.5 w-60 rounded-2xl bg-white text-[#2A1612] shadow-2xl border border-[#E8DFD5] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 overflow-hidden">
+                          <div className="px-4 py-2 border-b border-[#F4ECE4] bg-[#FAF6F2]/80">
+                            <span className="text-[10px] uppercase font-bold tracking-wider text-[#8C766E]">
+                              Spice Categories
+                            </span>
+                          </div>
                           {link.subItems?.map((subItem) => (
                             <Link
                               key={subItem.name}
                               href={subItem.href}
-                              onClick={() => setProductsDropdownOpen(false)}
-                              className="block px-4 py-2 text-sm text-[#2A1612] hover:bg-[#FAF6F2] hover:text-[#6B1118] font-medium transition-colors"
+                              onClick={() => setCategoriesDropdownOpen(false)}
+                              className="flex items-center justify-between px-4 py-2.5 text-sm text-[#2A1612] hover:bg-[#FAF6F2] hover:text-[#6B1118] font-medium transition-colors group/item"
                             >
-                              {subItem.name}
+                              <span>{subItem.name}</span>
+                              <ArrowRight className="w-3.5 h-3.5 text-stone-300 group-hover/item:text-[#6B1118] group-hover/item:translate-x-0.5 transition-all" />
                             </Link>
                           ))}
                         </div>
@@ -545,54 +561,86 @@ export function Navbar({
                 </button>
               </div>
 
-              {/* Navigation Links (Excludes Products since it's already in the main bottom bar) */}
-              <div className="mt-6 flex flex-col space-y-3">
+              {/* Navigation Links */}
+              <div className="mt-6 flex flex-col space-y-2">
                 {/* Home */}
-                <div>
-                  <Link
-                    href="/"
-                    onClick={(e) => {
-                      setMobileMenuOpen(false)
-                      handleHomeClick(e)
-                    }}
-                    className="block text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-1.5"
+                <Link
+                  href="/"
+                  onClick={(e) => {
+                    setMobileMenuOpen(false)
+                    handleHomeClick(e)
+                  }}
+                  className="block text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-2"
+                >
+                  Home
+                </Link>
+
+                {/* Categories Collapsible Accordion */}
+                <div className="border-y border-white/10 py-1">
+                  <button
+                    type="button"
+                    onClick={() => setMobileCategoriesOpen(!mobileCategoriesOpen)}
+                    className="w-full flex items-center justify-between text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-2 cursor-pointer"
                   >
-                    Home
-                  </Link>
+                    <span>Categories</span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-stone-300 transition-transform duration-200 ${
+                        mobileCategoriesOpen ? 'rotate-180 text-[#E5AD58]' : ''
+                      }`}
+                    />
+                  </button>
+                  {mobileCategoriesOpen && (
+                    <div className="pl-3 pr-1 pb-2 space-y-1.5 animate-in fade-in duration-150">
+                      {dynamicSubItems.map((subItem) => (
+                        <Link
+                          key={subItem.name}
+                          href={subItem.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center justify-between py-1.5 px-2.5 rounded-lg text-sm text-stone-300 hover:text-[#E5AD58] hover:bg-white/5 transition-colors"
+                        >
+                          <span>{subItem.name}</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                {/* Your Orders (Positioned above About Us & Contact) */}
-                <div>
-                  <Link
-                    href="/account/orders"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-1.5"
-                  >
-                    Your Orders
-                  </Link>
-                </div>
+                {/* All Spices */}
+                <Link
+                  href="/shop"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-2"
+                >
+                  All Spices
+                </Link>
+
+                {/* Your Orders */}
+                <Link
+                  href="/account/orders"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-2"
+                >
+                  Your Orders
+                </Link>
 
                 {/* About Us */}
-                <div>
-                  <Link
-                    href="/about"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-1.5"
-                  >
-                    About Us
-                  </Link>
-                </div>
+                <Link
+                  href="/about"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-2"
+                >
+                  About Us
+                </Link>
 
                 {/* Contact */}
-                <div>
-                  <Link
-                    href="/contact"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-1.5"
-                  >
-                    Contact
-                  </Link>
-                </div>
+                <Link
+                  href="/contact"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-base font-semibold text-stone-100 hover:text-[#E5AD58] transition-colors py-2"
+                >
+                  Contact
+                </Link>
               </div>
             </div>
 

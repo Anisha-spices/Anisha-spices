@@ -1,11 +1,44 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 
 export type ActionResult = {
   error?: string
   success?: boolean
+}
+
+async function getAdminClient() {
+  try {
+    const cookieStore = await cookies()
+    if (cookieStore.get('admin_session')?.value === 'authenticated') {
+      return createAdminClient()
+    }
+  } catch {
+    // Ignore cookie read failure
+  }
+
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) return null
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.role === 'admin') {
+      return createAdminClient()
+    }
+  } catch {
+    // Ignore auth failure
+  }
+
+  return null
 }
 
 export async function approveReview(
@@ -13,21 +46,8 @@ export async function approveReview(
   formData: FormData
 ): Promise<ActionResult> {
   try {
-    const supabase = await createClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return { error: 'Unauthorized' }
-    }
-
-    // Verify admin status
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || profile.role !== 'admin') {
+    const supabase = await getAdminClient()
+    if (!supabase) {
       return { error: 'Unauthorized. Admin access required.' }
     }
 
@@ -92,21 +112,8 @@ export async function deleteReview(
   formData: FormData
 ): Promise<ActionResult> {
   try {
-    const supabase = await createClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return { error: 'Unauthorized' }
-    }
-
-    // Verify admin status
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || profile.role !== 'admin') {
+    const supabase = await getAdminClient()
+    if (!supabase) {
       return { error: 'Unauthorized. Admin access required.' }
     }
 

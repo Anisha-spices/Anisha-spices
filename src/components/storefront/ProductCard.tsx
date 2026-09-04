@@ -30,8 +30,7 @@ export function ProductCard({
     ? Math.round(((originalPrice - minPrice) / originalPrice) * 100)
     : null
 
-  const displayRating = rating && rating > 0 ? rating : 4.9
-  const displayReviews = reviewCount && reviewCount > 0 ? reviewCount : 124
+  const hasReviews = Boolean(reviewCount && reviewCount > 0 && rating && rating > 0)
 
   return (
     <Link
@@ -72,15 +71,24 @@ export function ProductCard({
       {/* Content Container */}
       <div className="flex flex-col flex-1 p-3.5 sm:p-5">
         
-        {/* Star Rating Badge */}
-        <div className="flex items-center gap-1.5 mb-1.5">
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200/80 text-[11px] font-bold">
-            <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-            <span>{displayRating.toFixed(1)}</span>
-          </span>
-          <span className="text-[11px] text-[#8C766E]">
-            ({displayReviews})
-          </span>
+        {/* Rating / New Badge */}
+        <div className="flex items-center gap-1.5 mb-1.5 min-h-[22px]">
+          {hasReviews ? (
+            <>
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200/80 text-[11px] font-bold">
+                <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                <span>{rating!.toFixed(1)}</span>
+              </span>
+              <span className="text-[11px] text-[#8C766E]">
+                ({reviewCount})
+              </span>
+            </>
+          ) : (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-stone-50 text-stone-600 border border-stone-200 text-[11px] font-medium">
+              <Star className="w-3 h-3 text-stone-400" />
+              <span>New</span>
+            </span>
+          )}
         </div>
 
         <h3 className="font-serif text-sm sm:text-base lg:text-lg font-bold text-[#2A1612] group-hover:text-[#7B111A] transition-colors line-clamp-1">

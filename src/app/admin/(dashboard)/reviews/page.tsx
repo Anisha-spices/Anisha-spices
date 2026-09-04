@@ -1,25 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { ReviewList } from './_components/ReviewList'
-import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 
 export const metadata = {
   title: 'Reviews Management | Admin',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminReviewsPage() {
-  const supabase = await createClient()
-
-  // Verify admin status
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/admin/login')
-    
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.role !== 'admin') redirect('/')
+  const cookieStore = await cookies()
+  const isAdminCookie = cookieStore.get('admin_session')?.value === 'authenticated'
+  const supabase = isAdminCookie ? createAdminClient() : await createClient()
 
   // Fetch all reviews
   const { data: reviews } = await supabase

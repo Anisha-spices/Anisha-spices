@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, Sparkles, Search, ShoppingBag, X, ArrowRight, Loader2, Package, User } from 'lucide-react'
+import { Home, Sparkles, Search, ShoppingBag, X, ArrowRight, Loader2, Package, User, LayoutGrid } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 
 const POPULAR_SEARCHES = [
@@ -15,14 +15,32 @@ const POPULAR_SEARCHES = [
   'Cumin Powder',
 ]
 
-export function MobileBottomBar() {
+type CategoryItem = {
+  name: string
+  slug: string
+}
+
+const DEFAULT_CATEGORIES: CategoryItem[] = [
+  { name: 'Ground Spices', slug: 'ground-spices' },
+  { name: 'Blended Spices', slug: 'blended-spices' },
+  { name: 'Whole Spices (Khade Masale)', slug: 'whole-spices' },
+]
+
+export function MobileBottomBar({
+  categories = [],
+}: {
+  categories?: CategoryItem[]
+}) {
   const pathname = usePathname()
   const router = useRouter()
   const { itemCount } = useCart()
   const [searchOpen, setSearchOpen] = useState(false)
+  const [categoriesOpen, setCategoriesOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [isSearching, setIsSearching] = useState(false)
+
+  const resolvedCategories = categories.length > 0 ? categories : DEFAULT_CATEGORIES
 
   // Live auto-complete search effect for mobile modal
   useEffect(() => {
@@ -206,12 +224,90 @@ export function MobileBottomBar() {
         </div>
       )}
 
+      {/* Categories Overlay Modal */}
+      {categoriesOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex flex-col justify-end lg:hidden animate-fade-in">
+          <div
+            className="absolute inset-0"
+            onClick={() => setCategoriesOpen(false)}
+          />
+          <div className="relative bg-[#FAF6F2] rounded-t-3xl p-5 shadow-2xl border-t border-[#E8DCCB] max-h-[85vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-[#EFE5D5]">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🌿</span>
+                <div>
+                  <h3 className="font-serif text-lg font-bold text-[#2A1612]">
+                    Spice Categories
+                  </h3>
+                  <p className="text-[11px] text-[#8C766E]">
+                    Explore authentic Indian spices by type
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setCategoriesOpen(false)}
+                className="w-8 h-8 rounded-full bg-white text-[#6B5A52] flex items-center justify-center border border-[#E5D5C5] shadow-xs active:scale-95 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Categories List */}
+            <div className="py-4 space-y-2.5">
+              <Link
+                href="/shop"
+                onClick={() => setCategoriesOpen(false)}
+                className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-[#E8DFD5] hover:border-[#6B1118]/40 shadow-xs active:scale-[0.99] transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#FAF6F2] border border-[#E8DFD5] flex items-center justify-center text-lg">
+                    ✨
+                  </div>
+                  <div>
+                    <span className="text-sm font-bold text-[#2A1612] block">All Spices</span>
+                    <span className="text-xs text-[#8C766E]">View our complete spice catalogue</span>
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-stone-400" />
+              </Link>
+
+              {resolvedCategories.map((cat) => (
+                <Link
+                  key={cat.slug}
+                  href={`/shop?category=${cat.slug}`}
+                  onClick={() => setCategoriesOpen(false)}
+                  className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-[#E8DFD5] hover:border-[#6B1118]/40 shadow-xs active:scale-[0.99] transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200/60 flex items-center justify-center text-lg">
+                      {cat.slug.includes('ground') ? '🟡' : cat.slug.includes('blend') ? '🥘' : '🌿'}
+                    </div>
+                    <div>
+                      <span className="text-sm font-bold text-[#2A1612] block">{cat.name}</span>
+                      <span className="text-xs text-[#8C766E]">
+                        {cat.slug.includes('ground')
+                          ? 'Pure cold-ground turmeric, mirch & cumin'
+                          : cat.slug.includes('blend')
+                          ? 'Garam masala & signature royal blends'
+                          : 'Aromatic whole cardamom, cloves & pepper'}
+                      </span>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-stone-400" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Floating Glassmorphic Bottom Dock */}
       <nav
         aria-label="Mobile Navigation"
         className="fixed bottom-3 inset-x-3 z-40 lg:hidden"
       >
-        <div className="bg-[#240A0D]/90 backdrop-blur-xl border border-white/15 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] px-3 py-2 flex items-center justify-around">
+        <div className="bg-[#240A0D]/90 backdrop-blur-xl border border-white/15 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] px-2.5 py-2 flex items-center justify-around">
           
           {/* 1. Home */}
           <Link
@@ -221,8 +317,8 @@ export function MobileBottomBar() {
                 window.scrollTo({ top: 0, behavior: 'smooth' })
               }
             }}
-            className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 active:scale-90 ${
-              isHome && !searchOpen
+            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-200 active:scale-90 ${
+              isHome && !searchOpen && !categoriesOpen
                 ? 'text-[#F5D0A9] bg-white/10'
                 : 'text-white/70 hover:text-white'
             }`}
@@ -231,11 +327,28 @@ export function MobileBottomBar() {
             <span className="text-[10px] font-medium tracking-tight">Home</span>
           </Link>
 
-          {/* 2. Products */}
+          {/* 2. Categories */}
+          <button
+            type="button"
+            onClick={() => {
+              setCategoriesOpen(!categoriesOpen)
+              setSearchOpen(false)
+            }}
+            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-200 active:scale-90 cursor-pointer ${
+              categoriesOpen
+                ? 'text-[#F5D0A9] bg-white/10'
+                : 'text-white/70 hover:text-white'
+            }`}
+          >
+            <LayoutGrid className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium tracking-tight">Categories</span>
+          </button>
+
+          {/* 3. Products */}
           <Link
             href="/shop"
-            className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 active:scale-90 ${
-              isShop && !searchOpen
+            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-200 active:scale-90 ${
+              isShop && !searchOpen && !categoriesOpen
                 ? 'text-[#F5D0A9] bg-white/10'
                 : 'text-white/70 hover:text-white'
             }`}
@@ -244,10 +357,10 @@ export function MobileBottomBar() {
             <span className="text-[10px] font-medium tracking-tight">Products</span>
           </Link>
 
-          {/* 3. Cart */}
+          {/* 4. Cart */}
           <Link
             href="/cart"
-            className={`relative flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 active:scale-90 ${
+            className={`relative flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-200 active:scale-90 ${
               isCart
                 ? 'text-[#F5D0A9] bg-white/10'
                 : 'text-white/70 hover:text-white'
@@ -267,7 +380,7 @@ export function MobileBottomBar() {
           {/* 5. Profile Tab */}
           <Link
             href="/account"
-            className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 active:scale-90 ${
+            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-200 active:scale-90 ${
               pathname?.startsWith('/account') || pathname === '/login'
                 ? 'text-[#F5D0A9] bg-white/10'
                 : 'text-white/70 hover:text-white'

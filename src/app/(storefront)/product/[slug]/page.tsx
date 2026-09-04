@@ -34,6 +34,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function ProductDetailsPage({
   params,
 }: {
@@ -111,8 +113,8 @@ export default async function ProductDetailsPage({
     const minPrice = prices.length > 0 ? Math.min(...prices) : null
     const minVariant = activeVariants.find((v: any) => v.price === minPrice)
     const originalPrice = minVariant?.original_price || null
-    const rating = Number(rp.average_rating) || 4.9
-    const reviewCount = Number(rp.review_count) || 120
+    const rating = Number(rp.average_rating) || 0
+    const reviewCount = Number(rp.review_count) || 0
 
     return {
       id: rp.id,
@@ -153,11 +155,27 @@ export default async function ProductDetailsPage({
                       {product.categories.name}
                     </span>
                   )}
-                  <div className="flex items-center gap-1 text-[11px] sm:text-xs text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60">
-                    <span>★</span>
-                    <span>{product.average_rating || '4.9'}</span>
-                    <span className="text-stone-400 font-normal">({product.review_count || '120+'})</span>
-                  </div>
+                  {product.review_count > 0 && product.average_rating > 0 ? (
+                    <a
+                      href="#reviews"
+                      className="flex items-center gap-1 text-[11px] sm:text-xs text-amber-700 font-bold bg-amber-50 hover:bg-amber-100/70 px-2.5 py-0.5 rounded-full border border-amber-200/60 transition-colors cursor-pointer"
+                    >
+                      <span>★</span>
+                      <span>{Number(product.average_rating).toFixed(1)}</span>
+                      <span className="text-stone-400 font-normal">
+                        ({product.review_count} {product.review_count === 1 ? 'review' : 'reviews'})
+                      </span>
+                    </a>
+                  ) : (
+                    <a
+                      href="#reviews"
+                      className="flex items-center gap-1.5 text-[11px] sm:text-xs text-stone-600 font-medium bg-stone-50 hover:bg-stone-100 px-2.5 py-0.5 rounded-full border border-stone-200 transition-colors cursor-pointer"
+                    >
+                      <span className="text-amber-500 font-bold">★</span>
+                      <span>New</span>
+                      <span className="text-[#7B111A] font-semibold hover:underline">(Write a review)</span>
+                    </a>
+                  )}
                 </div>
 
                 <h1 className="font-serif text-xl xs:text-2xl sm:text-3xl lg:text-[2.6rem] font-bold text-[#2A1612] mb-1 sm:mb-3 leading-tight">
@@ -187,7 +205,7 @@ export default async function ProductDetailsPage({
           faqs={sortedFaqs}
           reviews={reviews as any}
           isAuthenticated={isAuthenticated}
-          averageRating={Number(product.average_rating) || 4.9}
+          averageRating={Number(product.average_rating) || 0}
         />
 
         {/* You May Also Like */}

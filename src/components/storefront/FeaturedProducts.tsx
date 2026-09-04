@@ -162,10 +162,19 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                   <div className="p-3 sm:p-5 flex flex-col flex-1">
                     <h3 className="font-bold text-stone-900 text-sm sm:text-lg mb-1 line-clamp-1 group-hover:text-orange-600 transition-colors">{product.name}</h3>
                     
-                    <div className="flex items-center gap-1 mb-2 sm:mb-3">
-                      <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-orange-500 text-orange-500" />
-                      <span className="text-xs sm:text-sm font-medium text-stone-700">{product.average_rating.toFixed(1)}</span>
-                      <span className="text-[10px] sm:text-sm text-stone-400 hidden sm:inline">({product.review_count})</span>
+                    <div className="flex items-center gap-1 mb-2 sm:mb-3 min-h-[20px]">
+                      {product.review_count > 0 && product.average_rating > 0 ? (
+                        <>
+                          <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-orange-500 text-orange-500" />
+                          <span className="text-xs sm:text-sm font-medium text-stone-700">{product.average_rating.toFixed(1)}</span>
+                          <span className="text-[10px] sm:text-sm text-stone-400 hidden sm:inline">({product.review_count})</span>
+                        </>
+                      ) : (
+                        <span className="text-xs text-stone-500 flex items-center gap-1">
+                          <Star className="w-3 h-3 text-stone-400" />
+                          <span>New</span>
+                        </span>
+                      )}
                     </div>
 
                     <div className="mt-auto flex items-center justify-between">

@@ -63,7 +63,7 @@ export default async function StorefrontLayout({
         <main className="flex-grow pb-16 lg:pb-0">{children}</main>
         <Footer />
         <FloatingContact />
-        <MobileBottomBar />
+        <MobileBottomBar categories={categories} />
       </div>
     </CartProvider>
   )

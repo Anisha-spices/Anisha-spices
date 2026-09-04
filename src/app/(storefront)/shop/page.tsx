@@ -9,6 +9,8 @@ export const metadata = {
   description: 'Explore our full range of 100% pure, cold-ground Turmeric, Kashmiri Red Chilly, Coriander, Cumin, and Garam Masala.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function ShopPage({
   searchParams,
 }: {
@@ -87,8 +89,8 @@ export default async function ShopPage({
     const minPrice = prices.length > 0 ? Math.min(...prices) : null
     const minVariant = activeVariants.find((v: any) => v.price === minPrice)
     const originalPrice = minVariant?.original_price || null
-    const rating = Number(product.average_rating) || 4.9
-    const reviewCount = Number(product.review_count) || 124
+    const rating = Number(product.average_rating) || 0
+    const reviewCount = Number(product.review_count) || 0
 
     return {
       id: product.id,

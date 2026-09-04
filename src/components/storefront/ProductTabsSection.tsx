@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Sparkles,
   Leaf,
@@ -44,9 +44,14 @@ export function ProductTabsSection({
   faqs = [],
   reviews = [],
   isAuthenticated,
-  averageRating = 4.9,
+  averageRating = 0,
 }: ProductTabsSectionProps) {
   const [activeTab, setActiveTab] = useState<'about' | 'specs' | 'faqs' | 'reviews'>('about')
+
+  const calculatedRating = reviews.length > 0
+    ? (averageRating > 0 ? averageRating : reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length)
+    : 0
+  const roundedStars = Math.min(5, Math.max(1, Math.round(calculatedRating)))
 
   // Review Form state
   const [writeReviewOpen, setWriteReviewOpen] = useState(false)
@@ -58,6 +63,22 @@ export function ProductTabsSection({
 
   // FAQ Accordion state
   const [openFaqId, setOpenFaqId] = useState<string | null>(faqs.length > 0 ? faqs[0].id : null)
+
+  useEffect(() => {
+    const handleHash = () => {
+      if (typeof window !== 'undefined' && window.location.hash === '#reviews') {
+        setActiveTab('reviews')
+        setWriteReviewOpen(true)
+        const el = document.getElementById('reviews')
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' })
+        }
+      }
+    }
+    handleHash()
+    window.addEventListener('hashchange', handleHash)
+    return () => window.removeEventListener('hashchange', handleHash)
+  }, [])
 
   const handleReviewSubmit = async (formData: FormData) => {
     setIsSubmittingReview(true)
@@ -89,7 +110,7 @@ export function ProductTabsSection({
   const displaySpecs = specs.length > 0 ? specs : defaultSpecs
 
   return (
-    <div className="mt-8 sm:mt-12 bg-white rounded-3xl border border-[#E8DFD5] shadow-sm overflow-hidden">
+    <div id="reviews" className="mt-8 sm:mt-12 bg-white rounded-3xl border border-[#E8DFD5] shadow-sm overflow-hidden scroll-mt-24">
       
       {/* ─── Tab Navigation Bar (Swipeable on mobile, Centered on desktop) ─── */}
       <div className="border-b border-[#E8DFD5] bg-[#FAF6F2]/70 px-3 sm:px-6">
@@ -336,10 +357,12 @@ export function ProductTabsSection({
             <div className="flex items-center gap-4 text-center sm:text-left">
               <div className="w-16 h-16 rounded-2xl bg-white border border-[#E8DFD5] flex flex-col items-center justify-center shadow-xs">
                 <span className="text-2xl font-black text-[#7B111A]">
-                  {Number(averageRating).toFixed(1)}
+                  {reviews.length > 0 ? calculatedRating.toFixed(1) : '—'}
                 </span>
-                <span className="text-[10px] font-bold text-amber-600 flex items-center">
-                  ★★★★★
+                <span className="text-[10px] font-bold text-amber-600 flex items-center tracking-widest">
+                  {reviews.length > 0
+                    ? '★'.repeat(roundedStars) + '☆'.repeat(5 - roundedStars)
+                    : '☆☆☆☆☆'}
                 </span>
               </div>
               <div>
@@ -347,7 +370,9 @@ export function ProductTabsSection({
                   Customer Reviews
                 </h3>
                 <p className="text-xs text-[#6E5951]">
-                  Based on {reviews.length} authentic customer ratings • 100% Verified Pure Spice
+                  {reviews.length > 0
+                    ? `Based on ${reviews.length} authentic customer rating${reviews.length > 1 ? 's' : ''} • 100% Verified Pure Spice`
+                    : 'No customer reviews yet. Be the first to share your experience!'}
                 </p>
               </div>
             </div>
