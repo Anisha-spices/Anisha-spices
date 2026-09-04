@@ -60,7 +60,7 @@ export default async function StorefrontLayout({
       <div className="min-h-screen flex flex-col bg-[#F8ECE7]">
         <AnnouncementBar />
         <Navbar isLoggedIn={isLoggedIn} categories={categories} />
-        <main className="flex-grow pb-16 lg:pb-0">{children}</main>
+        <main className="flex-grow">{children}</main>
         <Footer />
         <FloatingContact />
         <MobileBottomBar categories={categories} />

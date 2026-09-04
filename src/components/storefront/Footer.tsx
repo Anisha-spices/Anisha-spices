@@ -27,7 +27,7 @@ export function Footer() {
     }
   }
   return (
-    <footer className="bg-[#240609] text-white pt-16 pb-12 border-t border-[#4A0D13]">
+    <footer className="bg-[#240609] text-white pt-16 pb-28 lg:pb-12 border-t border-[#4A0D13]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Top Grid */}
