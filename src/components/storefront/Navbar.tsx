@@ -153,27 +153,19 @@ export function Navbar({
         <nav className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
           <div className="flex h-16 sm:h-20 items-center justify-between">
 
-            {/* Brand Logo & Name (Full Left on Mobile, Left on Desktop) */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Link href="/" onClick={handleHomeClick} className="group flex items-center gap-2 sm:gap-2.5">
+            {/* Brand Logo (Full Left on Mobile, Left on Desktop) */}
+            <div className="flex items-center">
+              <Link href="/" onClick={handleHomeClick} className="group flex items-center" aria-label="Anisha Spices">
                 {/* Official Brand Logo */}
-                <div className="relative w-9 h-9 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-[#E5AD58]/50 group-hover:scale-105 transition-transform shadow-md shrink-0 bg-black">
+                <div className="relative w-12 h-12 sm:w-16 sm:h-16 lg:w-[68px] lg:h-[68px] rounded-full overflow-hidden border border-[#E5AD58]/60 group-hover:scale-105 transition-transform shadow-md shrink-0 bg-black">
                   <Image
                     src="/images/logo.jpeg"
                     alt="Anisha Spices Logo"
                     fill
                     priority
                     className="object-cover"
-                    sizes="(max-width: 640px) 36px, 48px"
+                    sizes="(max-width: 640px) 48px, (max-width: 1024px) 64px, 68px"
                   />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-serif text-lg sm:text-2xl font-bold tracking-tight text-white group-hover:text-[#E5AD58] transition-colors leading-tight">
-                    Anisha
-                  </span>
-                  <span className="text-[8px] sm:text-[10px] tracking-[0.25em] uppercase font-semibold text-[#E5AD58] -mt-0.5">
-                    Spices
-                  </span>
                 </div>
               </Link>
             </div>
@@ -540,13 +532,13 @@ export function Navbar({
               {/* Header */}
               <div className="flex items-center justify-between border-b border-white/15 pb-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="relative w-8 h-8 rounded-full overflow-hidden border border-[#E5AD58]/50 shrink-0 bg-black">
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden border border-[#E5AD58]/50 shrink-0 bg-black">
                     <Image
                       src="/images/logo.jpeg"
                       alt="Anisha Spices Logo"
                       fill
                       className="object-cover"
-                      sizes="32px"
+                      sizes="40px"
                     />
                   </div>
                   <span className="font-serif text-lg font-bold text-white">Anisha Spices</span>

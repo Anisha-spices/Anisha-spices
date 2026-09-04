@@ -2,12 +2,27 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 export type ActionResult = {
   error?: string
   success?: boolean
+}
+
+async function getAdminDb() {
+  const cookieStore = await cookies()
+  const hasAdminCookie = cookieStore.get('admin_session')?.value === 'authenticated'
+  if (hasAdminCookie) {
+    return createAdminClient()
+  }
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    return createAdminClient()
+  }
+  return supabase
 }
 
 function slugify(text: string): string {
@@ -24,7 +39,7 @@ export async function createProduct(
   _prevState: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const supabase = await getAdminDb()
 
   const name = formData.get('name') as string
   const categoryId = formData.get('category_id') as string
@@ -34,6 +49,12 @@ export async function createProduct(
   const seoDescription = formData.get('seo_description') as string
   const isActive = formData.get('is_active') === 'on'
   const isFeatured = formData.get('is_featured') === 'on'
+
+  // Pricing & variant fields
+  const priceStr = formData.get('price') as string
+  const originalPriceStr = formData.get('original_price') as string
+  const variantName = ((formData.get('variant_name') as string) || '').trim() || 'Standard Pack'
+  const stockQuantityStr = formData.get('stock_quantity') as string
 
   if (!name) {
     return { error: 'Product name is required' }
@@ -60,7 +81,33 @@ export async function createProduct(
     return { error: error.message }
   }
 
+  // If price is provided, create the initial variant automatically
+  if (priceStr && !isNaN(parseFloat(priceStr))) {
+    const price = parseFloat(priceStr)
+    const originalPrice = originalPriceStr && !isNaN(parseFloat(originalPriceStr))
+      ? parseFloat(originalPriceStr)
+      : null
+    const stockQuantity = stockQuantityStr && !isNaN(parseInt(stockQuantityStr, 10))
+      ? parseInt(stockQuantityStr, 10)
+      : 100
+
+    const { error: variantError } = await supabase.from('product_variants').insert({
+      product_id: product.id,
+      variant_name: variantName,
+      price,
+      original_price: originalPrice,
+      stock_quantity: stockQuantity,
+      is_active: true,
+    })
+
+    if (variantError) {
+      console.error('Error inserting initial variant for product:', variantError)
+    }
+  }
+
   revalidatePath('/admin/products')
+  revalidatePath('/shop')
+  revalidatePath('/')
   redirect(`/admin/products/${product.id}/edit`)
 }
 
@@ -68,7 +115,7 @@ export async function updateProduct(
   _prevState: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const supabase = await getAdminDb()
 
   const id = formData.get('id') as string
   const name = formData.get('name') as string
@@ -295,7 +342,7 @@ export async function createProductVariant(
   _prevState: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const supabase = await getAdminDb()
 
   const productId = formData.get('product_id') as string
   const variantName = formData.get('variant_name') as string
@@ -329,7 +376,7 @@ export async function updateProductVariant(
   _prevState: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const supabase = await getAdminDb()
 
   const id = formData.get('id') as string
   const productId = formData.get('product_id') as string
@@ -366,7 +413,7 @@ export async function deleteProductVariant(
   id: string,
   productId: string
 ): Promise<ActionResult> {
-  const supabase = await createClient()
+  const supabase = await getAdminDb()
 
   const { error } = await supabase.from('product_variants').delete().eq('id', id)
 

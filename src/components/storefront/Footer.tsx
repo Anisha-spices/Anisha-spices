@@ -36,13 +36,13 @@ export function Footer() {
           {/* Brand & Mission */}
           <div className="sm:col-span-2 lg:col-span-4 space-y-4 text-center sm:text-left">
             <Link href="/" className="flex items-center justify-center sm:justify-start gap-3">
-              <div className="relative w-11 h-11 rounded-full overflow-hidden border border-[#D49B4B]/50 flex items-center justify-center shrink-0 shadow-md bg-black">
+              <div className="relative w-11 h-11 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full overflow-hidden border border-[#D49B4B]/50 flex items-center justify-center shrink-0 shadow-md bg-black">
                 <Image
                   src="/images/logo.jpeg"
                   alt="Anisha Spices Logo"
                   fill
                   className="object-cover"
-                  sizes="44px"
+                  sizes="(max-width: 640px) 44px, 64px"
                 />
               </div>
               <span className="font-serif text-2xl font-bold tracking-tight text-white">

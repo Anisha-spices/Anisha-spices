@@ -1,13 +1,13 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useState, useActionState } from 'react'
 import {
   createProduct,
   updateProduct,
   type ActionResult,
 } from '@/actions/products'
 import Link from 'next/link'
-import { Save, ArrowLeft } from 'lucide-react'
+import { Save, ArrowLeft, IndianRupee } from 'lucide-react'
 import type { Category, Product } from '@/types/database'
 
 interface ProductFormProps {
@@ -23,6 +23,20 @@ export default function ProductForm({ product, categories }: ProductFormProps) {
     action,
     {}
   )
+
+  const [sellingPrice, setSellingPrice] = useState('')
+  const [mrpPrice, setMrpPrice] = useState('')
+
+  const discountInfo = (() => {
+    const sp = parseFloat(sellingPrice)
+    const mrp = parseFloat(mrpPrice)
+    if (!isNaN(sp) && !isNaN(mrp) && mrp > sp && sp > 0) {
+      const diff = Math.round((mrp - sp) * 100) / 100
+      const percent = Math.round((diff / mrp) * 100)
+      return { diff, percent }
+    }
+    return null
+  })()
 
   return (
     <form action={formAction} className="space-y-6">
@@ -162,6 +176,151 @@ export default function ProductForm({ product, categories }: ProductFormProps) {
           </label>
         </div>
       </div>
+
+      {/* Pricing & Initial Variant (Only when creating a new product) */}
+      {!isEditing ? (
+        <div className="bg-white rounded-xl border border-stone-200/80 p-6 space-y-5">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-semibold text-stone-900 flex items-center gap-2">
+              <IndianRupee className="w-4 h-4 text-orange-600" />
+              <span>Pricing & Pack Details</span>
+            </h2>
+            <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200/60">
+              Initial Pack
+            </span>
+          </div>
+          <p className="text-xs text-stone-500 -mt-2">
+            Set the selling price and actual price (MRP) directly here. More pack sizes can be added on the edit page.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Selling Price */}
+            <div>
+              <label
+                htmlFor="product-price"
+                className="block text-sm font-medium text-stone-700 mb-1.5"
+              >
+                Selling Price (₹) <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 font-semibold text-sm">
+                  ₹
+                </span>
+                <input
+                  id="product-price"
+                  name="price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  required
+                  placeholder="e.g. 99"
+                  value={sellingPrice}
+                  onChange={(e) => setSellingPrice(e.target.value)}
+                  className="w-full pl-8 pr-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
+                />
+              </div>
+              <p className="text-xs text-stone-400 mt-1.5">
+                Customer selling price (बिक्री मूल्य)
+              </p>
+            </div>
+
+            {/* Actual / Original Price (MRP) */}
+            <div>
+              <label
+                htmlFor="product-original-price"
+                className="block text-sm font-medium text-stone-700 mb-1.5"
+              >
+                Actual / MRP Price (₹)
+              </label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 font-semibold text-sm">
+                  ₹
+                </span>
+                <input
+                  id="product-original-price"
+                  name="original_price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="e.g. 149 (optional)"
+                  value={mrpPrice}
+                  onChange={(e) => setMrpPrice(e.target.value)}
+                  className="w-full pl-8 pr-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
+                />
+              </div>
+              <p className="text-xs text-stone-400 mt-1.5">
+                Original MRP for strikethrough discount (वास्तविक मूल्य)
+              </p>
+            </div>
+          </div>
+
+          {/* Live Discount Calculator Preview */}
+          {discountInfo && (
+            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs flex flex-wrap items-center justify-between gap-2">
+              <span className="font-semibold flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Customer saves ₹{discountInfo.diff} ({discountInfo.percent}% OFF)
+              </span>
+              <span className="text-stone-600">
+                Display: <span className="line-through text-stone-400">₹{mrpPrice}</span>{' '}
+                <span className="font-bold text-stone-900">₹{sellingPrice}</span>
+              </span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-3 border-t border-stone-100">
+            {/* Pack Size / Variant Name */}
+            <div>
+              <label
+                htmlFor="product-variant-name"
+                className="block text-sm font-medium text-stone-700 mb-1.5"
+              >
+                Pack Size / Variant Name
+              </label>
+              <input
+                id="product-variant-name"
+                name="variant_name"
+                type="text"
+                defaultValue="Standard Pack"
+                placeholder="e.g. 100g, 250g, Standard Pack"
+                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
+              />
+              <p className="text-xs text-stone-400 mt-1.5">
+                Default pack size label (e.g. 100g, 250g, Standard Pack)
+              </p>
+            </div>
+
+            {/* Stock Quantity */}
+            <div>
+              <label
+                htmlFor="product-stock"
+                className="block text-sm font-medium text-stone-700 mb-1.5"
+              >
+                Initial Stock Quantity
+              </label>
+              <input
+                id="product-stock"
+                name="stock_quantity"
+                type="number"
+                min="0"
+                defaultValue={100}
+                placeholder="100"
+                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all duration-200"
+              />
+              <p className="text-xs text-stone-400 mt-1.5">
+                Available stock for this pack size
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-stone-50 rounded-xl border border-stone-200/80 p-4 text-xs text-stone-500 flex items-center gap-2">
+          <IndianRupee className="w-4 h-4 text-stone-400 shrink-0" />
+          <span>
+            Pricing, MRP, and pack sizes for this product are managed in the <strong>Product Variants</strong> section below.
+          </span>
+        </div>
+      )}
 
       {/* SEO */}
       <div className="bg-white rounded-xl border border-stone-200/80 p-6 space-y-5">
