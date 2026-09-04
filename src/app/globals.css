@@ -79,3 +79,22 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Rotating Heritage Seal animation */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 22s linear infinite;
+}
+
+.animate-spin-reverse-slow {
+  animation: spin-slow 28s linear infinite reverse;
+}
+

@@ -1,5 +1,6 @@
-import Image from 'next/image'
 import { SPICE_ASSETS } from '@/constants/assets'
+import { HeritageSeal } from '@/components/storefront/HeritageSeal'
+
 
 export function PromiseSection() {
   const promises = [
@@ -65,17 +66,9 @@ export function PromiseSection() {
             </p>
           </div>
 
-          {/* Center Column: Vintage Circular Quality Seal Stamp */}
-          <div className="lg:col-span-4 flex justify-center items-center my-2 lg:my-0">
-            <div className="relative w-48 h-48 sm:w-64 sm:h-64 lg:w-72 lg:h-72 rounded-full overflow-hidden shadow-2xl border-4 border-white transform hover:scale-105 transition-transform duration-500 bg-white">
-              <Image
-                src={SPICE_ASSETS.qualitySeal}
-                alt="Pure Natural Premium Quality Seal Stamp"
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 200px, 300px"
-              />
-            </div>
+          {/* Center Column: Rotating Royal Heritage Quality Seal Stamp */}
+          <div className="lg:col-span-4 flex justify-center items-center my-4 lg:my-0">
+            <HeritageSeal size="lg" showTagline />
           </div>
 
           {/* Right Column: 2x2 Grid of Trust Guarantees */}

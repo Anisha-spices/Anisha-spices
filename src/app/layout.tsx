@@ -21,7 +21,14 @@ export const metadata: Metadata = {
   description:
     "Anisha Spices brings the richness of India's finest spices to your kitchen. Pure, natural & full of flavor.",
   icons: {
-    icon: '/images/logo.jpeg',
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
 };
 
